@@ -1,0 +1,1645 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Network18 GRC Workstream — Deep Dive Playbook</title>
+<style>
+  :root {
+    --orange:#D04A02; --deep:#B7410E; --yellow:#FFB600;
+    --ink:#1A1A1A; --grey-1:#FAFAFA; --grey-2:#F0F0F0; --grey-3:#DEDEDE;
+    --grey-4:#888; --grey-5:#555; --red:#C0392B; --amber:#E67E22;
+    --green:#27AE60; --blue:#2980B9; --purple:#6F2DA8; --teal:#16A085;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;font-family:-apple-system,"Segoe UI","Helvetica Neue",sans-serif;color:var(--ink);background:var(--grey-1);line-height:1.65;font-size:16px;}
+
+  .hero{background:linear-gradient(135deg,#0F2E1A 0%,#2C1A0F 60%,#B7410E 100%);color:#fff;padding:60px 40px 50px;text-align:center;}
+  .hero-tag{display:inline-block;background:var(--green);color:#fff;padding:6px 16px;border-radius:20px;font-size:12px;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:18px;font-weight:600;}
+  .hero h1{font-size:42px;margin:0 0 14px;font-weight:800;letter-spacing:-0.8px;}
+  .hero p{font-size:17px;max-width:780px;margin:0 auto;color:#E4F5E8;line-height:1.5;}
+  .hero-meta{display:flex;justify-content:center;gap:14px;flex-wrap:wrap;margin-top:22px;font-size:12px;color:#CFEED2;}
+  .hero-meta span{border:1px solid rgba(207,238,210,0.5);padding:5px 12px;border-radius:18px;}
+
+  .container{max-width:1100px;margin:0 auto;padding:0 30px 80px;}
+
+  .how-box{background:#F2FBF4;border-left:5px solid var(--green);padding:22px 26px;margin:36px 0;border-radius:6px;}
+  .how-box h3{margin:0 0 8px;color:#1B5E20;font-size:18px;}
+  .how-box p{margin:6px 0;font-size:15.5px;}
+
+  .part-banner{background:var(--ink);color:#fff;padding:26px 30px;margin:54px -30px 26px;border-radius:10px;text-align:center;}
+  .part-banner .num{display:block;font-size:12px;letter-spacing:3px;color:var(--yellow);margin-bottom:6px;font-weight:700;}
+  .part-banner h2{margin:0;font-size:28px;font-weight:800;}
+
+  .card{background:#fff;border-radius:10px;padding:26px 30px;margin:20px 0;box-shadow:0 2px 8px rgba(0,0,0,0.05);}
+  .card h3{color:var(--ink);font-size:22px;margin:0 0 8px;font-weight:700;}
+  .card .subtitle{color:var(--grey-4);font-size:13px;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:14px;font-weight:600;}
+  .card p{margin:10px 0;font-size:15.5px;}
+  .card h4{color:var(--deep);font-size:17px;margin:20px 0 8px;}
+  .card h5{color:var(--grey-5);font-size:13px;text-transform:uppercase;letter-spacing:1.2px;margin:18px 0 8px;font-weight:700;}
+  .card ul li,.card ol li{margin:5px 0;font-size:15px;}
+
+  .net18{background:#F8F4FF;border-left:5px solid var(--purple);padding:14px 20px;margin:14px 0;border-radius:6px;}
+  .net18 strong{color:#4A1F73;display:block;font-size:12px;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:5px;}
+  .net18 p{margin:4px 0;font-size:15px;}
+  .net18 ul{margin:6px 0;padding-left:20px;}
+  .net18 li{margin:3px 0;font-size:14.5px;}
+
+  .mini{background:#FFF6E6;border:2px solid var(--amber);border-radius:10px;padding:16px 20px;margin:18px 0;position:relative;}
+  .mini .badge{position:absolute;top:-12px;left:18px;background:var(--amber);color:#fff;padding:3px 12px;border-radius:12px;font-size:11px;letter-spacing:1.2px;text-transform:uppercase;font-weight:700;}
+  .mini h4{margin:6px 0 8px;color:#8C4500;font-size:16px;}
+  .mini p{margin:5px 0;font-size:15px;}
+  .mini .lesson{margin-top:10px;padding-top:8px;border-top:1px dashed var(--amber);font-size:14px;color:#8C4500;}
+  .mini .lesson strong{color:#5C2E00;}
+
+  .memory{background:#FFFBE6;border:2px solid var(--yellow);border-radius:10px;padding:14px 20px;margin:14px 0;position:relative;}
+  .memory .badge{position:absolute;top:-11px;left:16px;background:var(--yellow);color:var(--ink);padding:3px 12px;border-radius:12px;font-size:11px;letter-spacing:1.2px;text-transform:uppercase;font-weight:700;}
+  .memory h4{margin:4px 0 6px;color:#7C5E00;font-size:15px;}
+  .memory p{margin:4px 0;font-size:14.5px;color:#5C4500;}
+
+  .qa{background:#E8F3FB;border-left:5px solid var(--blue);padding:16px 22px;margin:16px 0;border-radius:6px;}
+  .qa .q{font-weight:700;color:#1B4D7A;margin-bottom:6px;font-size:15.5px;}
+  .qa .a{font-size:15px;color:#1A1A1A;}
+
+  .key{background:#E8F5E9;border-left:5px solid var(--green);padding:13px 18px;margin:14px 0;border-radius:4px;}
+  .key strong{color:#1B5E20;}
+  .warn{background:#FDECEA;border-left:5px solid var(--red);padding:13px 18px;margin:14px 0;border-radius:4px;}
+  .warn strong{color:#8B1A0E;}
+  .info{background:#E8F3FB;border-left:5px solid var(--blue);padding:13px 18px;margin:14px 0;border-radius:4px;}
+  .info strong{color:#1B4D7A;}
+
+  .figure{margin:24px auto;text-align:center;background:#fff;padding:20px;border-radius:10px;border:1px solid var(--grey-3);}
+  .figure svg{max-width:100%;height:auto;display:block;margin:0 auto;}
+  .figure-caption{margin-top:10px;font-size:13.5px;color:var(--grey-5);font-style:italic;}
+
+  table.simple{width:100%;border-collapse:collapse;margin:12px 0;font-size:14px;}
+  table.simple th{background:var(--ink);color:#fff;text-align:left;padding:10px 12px;font-size:11.5px;text-transform:uppercase;letter-spacing:1px;}
+  table.simple td{padding:9px 12px;border-bottom:1px solid var(--grey-2);vertical-align:top;}
+  table.simple tr:nth-child(even) td{background:#FAFAFA;}
+
+  .step{display:flex;gap:16px;margin:16px 0;align-items:flex-start;}
+  .step-num{flex-shrink:0;width:40px;height:40px;background:var(--green);color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:17px;}
+  .step-content{flex:1;padding-top:3px;}
+  .step-content h4{margin:0 0 3px;color:var(--ink);font-size:16px;}
+  .step-content p{margin:0;font-size:14.5px;}
+
+  .two-col{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:16px 0;}
+  .three-col{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:16px 0;}
+  .four-col{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:16px 0;}
+
+  .control-card{background:#fff;border:1px solid var(--grey-3);border-radius:8px;padding:14px;}
+  .control-card.org{border-top:4px solid var(--blue);}
+  .control-card.people{border-top:4px solid var(--green);}
+  .control-card.physical{border-top:4px solid var(--amber);}
+  .control-card.tech{border-top:4px solid var(--purple);}
+  .control-card h5{margin:0 0 6px;font-size:13.5px;color:var(--ink);}
+  .control-card .count{font-size:22px;font-weight:800;}
+  .control-card.org .count{color:var(--blue);}
+  .control-card.people .count{color:var(--green);}
+  .control-card.physical .count{color:var(--amber);}
+  .control-card.tech .count{color:var(--purple);}
+  .control-card p{font-size:12px;color:var(--grey-5);margin:4px 0 0;}
+
+  .cheat{background:var(--ink);color:#fff;border-radius:10px;padding:24px 28px;margin:20px 0;}
+  .cheat h3{color:var(--yellow);margin:0 0 12px;font-size:20px;}
+  .cheat ul{list-style:none;padding:0;margin:0;}
+  .cheat li{padding:9px 0;border-bottom:1px solid rgba(255,255,255,0.1);font-size:15px;}
+  .cheat li:last-child{border-bottom:none;}
+  .cheat li strong{color:var(--yellow);}
+
+  .glossary-item{margin:12px 0;padding-bottom:10px;border-bottom:1px solid var(--grey-3);}
+  .glossary-item strong{color:var(--green);font-size:15px;display:block;margin-bottom:3px;}
+  .glossary-item p{margin:3px 0;font-size:14.5px;}
+
+  footer{text-align:center;padding:36px 24px;color:var(--grey-4);font-size:12px;border-top:1px solid var(--grey-3);margin-top:50px;}
+
+  @media (max-width:760px){
+    .hero h1{font-size:28px;}
+    .container{padding:0 18px 50px;}
+    .part-banner{margin:36px -18px 18px;padding:18px;}
+    .part-banner h2{font-size:22px;}
+    .card{padding:18px;}
+    .two-col,.three-col,.four-col{grid-template-columns:1fr;}
+  }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <span class="hero-tag">GRC Workstream Playbook · Yours to own</span>
+  <h1>Network18 GRC Workstream — Deep Dive</h1>
+  <p>Everything you need to walk into Network18 with authority. Concepts → Network18 examples → mini-scenarios → Q&amp;A. Built so it sticks.</p>
+  <div class="hero-meta">
+    <span>Workstream 3 · GRC</span>
+    <span>Annual cycles</span>
+    <span>2 Locations · ~340 Vendors</span>
+    <span>5 External TPRM</span>
+    <span>SPOC: You / Aravind CR</span>
+  </div>
+</header>
+
+<div class="container">
+
+<div class="how-box">
+  <h3>How to use this playbook</h3>
+  <p><strong>Print Parts 1, 2 and 9.</strong> Keep them on your desk for the first 90 days.</p>
+  <p><strong>Read everything else twice.</strong> Once for understanding, once with a highlighter.</p>
+  <p><strong>Memorize the "anchors"</strong> (yellow boxes). They are the mental scaffolding that lets you answer any question without scrambling.</p>
+  <p><strong>Practice the Q&amp;A bank</strong> (Part 9) aloud. The Network18 CISO will ask half of these in week one.</p>
+</div>
+
+<!-- ============================================ -->
+<!-- PART 1 — WORKSTREAM OVERVIEW -->
+<!-- ============================================ -->
+<div class="part-banner">
+  <span class="num">PART 1</span>
+  <h2>The GRC Workstream — What We're Selling</h2>
+</div>
+
+<div class="card">
+  <h3>The 4 things we deliver</h3>
+  <p class="subtitle">Per the contract scope, the GRC workstream has four threads</p>
+
+  <ol>
+    <li><strong>ISO/IEC 27001:2022 Audit Readiness &amp; External Certification Support</strong> — get Network18 ready, take them through the external audit, achieve certification.</li>
+    <li><strong>Integrated ISO Certification Support</strong> — ISO 9001 (Quality), ISO 14001 (Environment), ISO 45001 (OH&amp;S) — all run as one integrated management system alongside 27001.</li>
+    <li><strong>Third-Party Risk Management (TPRM) Support</strong> — design and run the program managing ~340 vendors.</li>
+    <li><strong>Third-Party Risk Assessment Support</strong> — 5 deep external assessments per year on critical vendors.</li>
+  </ol>
+
+  <div class="net18">
+    <strong>Network18-specific scope</strong>
+    <ul>
+      <li><strong>Locations:</strong> 2 — Mumbai HQ (Empire Plaza, Lower Parel) + Noida</li>
+      <li><strong>Employees in scope:</strong> ~6,200</li>
+      <li><strong>Critical applications:</strong> 47 (MoneyControl, CNBC TV18, News18, OTT/VOOT, ad-tech, broadcast playout, subscription, HR, CRM, etc.)</li>
+      <li><strong>Vendors:</strong> ~340 total — 22 Tier-1, 78 Tier-2, 240 Tier-3</li>
+      <li><strong>5 deep external TPRM assessments:</strong> typically AWS, GCP, primary ad-tech, primary CDN, plus rotating</li>
+      <li><strong>Regulators in play:</strong> SEBI (listed company), MeitY/CERT-In (IT Act), DPDPA 2023, IT Rules 2021 (intermediary obligations), Income Tax (financial), Cable TV Act (broadcasting)</li>
+    </ul>
+  </div>
+</div>
+
+<!-- WORKSTREAM OVERVIEW SVG -->
+<div class="figure">
+  <svg viewBox="0 0 950 480" xmlns="http://www.w3.org/2000/svg">
+    <text x="475" y="26" text-anchor="middle" font-family="Helvetica" font-size="18" font-weight="700" fill="#1A1A1A">GRC Workstream — At a Glance</text>
+
+    <!-- Top: the 4 services -->
+    <rect x="30" y="60" width="220" height="100" rx="10" fill="#27AE60"/>
+    <text x="140" y="90" text-anchor="middle" font-family="Helvetica" font-size="13" font-weight="700" fill="#fff">SERVICE 1</text>
+    <text x="140" y="112" text-anchor="middle" font-family="Helvetica" font-size="12" fill="#fff">ISO 27001:2022</text>
+    <text x="140" y="130" text-anchor="middle" font-family="Helvetica" font-size="10" fill="#fff">Audit Readiness +</text>
+    <text x="140" y="146" text-anchor="middle" font-family="Helvetica" font-size="10" fill="#fff">External Certification</text>
+
+    <rect x="265" y="60" width="220" height="100" rx="10" fill="#2980B9"/>
+    <text x="375" y="90" text-anchor="middle" font-family="Helvetica" font-size="13" font-weight="700" fill="#fff">SERVICE 2</text>
+    <text x="375" y="112" text-anchor="middle" font-family="Helvetica" font-size="12" fill="#fff">Integrated MS</text>
+    <text x="375" y="130" text-anchor="middle" font-family="Helvetica" font-size="10" fill="#fff">ISO 9001 / 14001 /</text>
+    <text x="375" y="146" text-anchor="middle" font-family="Helvetica" font-size="10" fill="#fff">45001 + 27001</text>
+
+    <rect x="500" y="60" width="220" height="100" rx="10" fill="#E67E22"/>
+    <text x="610" y="90" text-anchor="middle" font-family="Helvetica" font-size="13" font-weight="700" fill="#fff">SERVICE 3</text>
+    <text x="610" y="112" text-anchor="middle" font-family="Helvetica" font-size="12" fill="#fff">TPRM Program</text>
+    <text x="610" y="130" text-anchor="middle" font-family="Helvetica" font-size="10" fill="#fff">~340 vendors</text>
+    <text x="610" y="146" text-anchor="middle" font-family="Helvetica" font-size="10" fill="#fff">Annual cycle</text>
+
+    <rect x="735" y="60" width="195" height="100" rx="10" fill="#6F2DA8"/>
+    <text x="833" y="90" text-anchor="middle" font-family="Helvetica" font-size="13" font-weight="700" fill="#fff">SERVICE 4</text>
+    <text x="833" y="112" text-anchor="middle" font-family="Helvetica" font-size="12" fill="#fff">5 External</text>
+    <text x="833" y="130" text-anchor="middle" font-family="Helvetica" font-size="10" fill="#fff">TPRM Deep</text>
+    <text x="833" y="146" text-anchor="middle" font-family="Helvetica" font-size="10" fill="#fff">Assessments</text>
+
+    <!-- Middle: team -->
+    <rect x="30" y="195" width="900" height="80" rx="10" fill="#1A1A1A"/>
+    <text x="475" y="222" text-anchor="middle" font-family="Helvetica" font-size="13" font-weight="700" fill="#FFB600">YOUR TEAM (4 FTE)</text>
+    <line x1="80" y1="232" x2="870" y2="232" stroke="#FFB600" opacity="0.4"/>
+    <text x="180" y="255" text-anchor="middle" font-family="Helvetica" font-size="12" fill="#fff">GRC Lead</text>
+    <text x="180" y="270" text-anchor="middle" font-family="Helvetica" font-size="10" fill="#CFEED2">You</text>
+
+    <text x="380" y="255" text-anchor="middle" font-family="Helvetica" font-size="12" fill="#fff">2× ISO/ISMS Consultants</text>
+    <text x="380" y="270" text-anchor="middle" font-family="Helvetica" font-size="10" fill="#CFEED2">Senior + Associate</text>
+
+    <text x="580" y="255" text-anchor="middle" font-family="Helvetica" font-size="12" fill="#fff">1× TPRM Specialist</text>
+    <text x="580" y="270" text-anchor="middle" font-family="Helvetica" font-size="10" fill="#CFEED2">+ surge for the 5 assessments</text>
+
+    <text x="800" y="255" text-anchor="middle" font-family="Helvetica" font-size="12" fill="#fff">SME Pool</text>
+    <text x="800" y="270" text-anchor="middle" font-family="Helvetica" font-size="10" fill="#CFEED2">DPDPA, BCP, OH&amp;S, env.</text>
+
+    <!-- Bottom: 12-month timeline -->
+    <text x="475" y="305" text-anchor="middle" font-family="Helvetica" font-size="13" font-weight="700" fill="#1A1A1A">Year 1 Timeline</text>
+
+    <line x1="60" y1="345" x2="920" y2="345" stroke="#27AE60" stroke-width="3"/>
+    <circle cx="130" cy="345" r="10" fill="#27AE60"/>
+    <circle cx="290" cy="345" r="10" fill="#27AE60"/>
+    <circle cx="450" cy="345" r="10" fill="#27AE60"/>
+    <circle cx="610" cy="345" r="10" fill="#27AE60"/>
+    <circle cx="770" cy="345" r="10" fill="#27AE60"/>
+    <circle cx="900" cy="345" r="10" fill="#1A1A1A"/>
+
+    <text x="130" y="375" text-anchor="middle" font-family="Helvetica" font-size="11" font-weight="700" fill="#1A1A1A">M1-M2</text>
+    <text x="130" y="392" text-anchor="middle" font-family="Helvetica" font-size="10" fill="#555">Gap Assessment</text>
+
+    <text x="290" y="375" text-anchor="middle" font-family="Helvetica" font-size="11" font-weight="700" fill="#1A1A1A">M3-M6</text>
+    <text x="290" y="392" text-anchor="middle" font-family="Helvetica" font-size="10" fill="#555">Build &amp; Remediate</text>
+
+    <text x="450" y="375" text-anchor="middle" font-family="Helvetica" font-size="11" font-weight="700" fill="#1A1A1A">M7-M8</text>
+    <text x="450" y="392" text-anchor="middle" font-family="Helvetica" font-size="10" fill="#555">Internal Audit</text>
+
+    <text x="610" y="375" text-anchor="middle" font-family="Helvetica" font-size="11" font-weight="700" fill="#1A1A1A">M9</text>
+    <text x="610" y="392" text-anchor="middle" font-family="Helvetica" font-size="10" fill="#555">Mgmt Review</text>
+
+    <text x="770" y="375" text-anchor="middle" font-family="Helvetica" font-size="11" font-weight="700" fill="#1A1A1A">M10-M11</text>
+    <text x="770" y="392" text-anchor="middle" font-family="Helvetica" font-size="10" fill="#555">CB Audit S1+S2</text>
+
+    <text x="900" y="375" text-anchor="middle" font-family="Helvetica" font-size="11" font-weight="700" fill="#FFB600">M12</text>
+    <text x="900" y="392" text-anchor="middle" font-family="Helvetica" font-size="10" fill="#555">Certification</text>
+
+    <!-- Bottom strip -->
+    <rect x="30" y="420" width="900" height="40" rx="6" fill="#F2FBF4" stroke="#27AE60"/>
+    <text x="475" y="445" text-anchor="middle" font-family="Helvetica" font-size="13" font-weight="700" fill="#1B5E20">TPRM operates in parallel · 5 external assessments distributed across the year</text>
+  </svg>
+  <div class="figure-caption">Four services, one team, twelve-month calendar.</div>
+</div>
+
+<!-- ============================================ -->
+<!-- PART 2 — THE MENTAL MODEL -->
+<!-- ============================================ -->
+<div class="part-banner">
+  <span class="num">PART 2</span>
+  <h2>The Mental Model — How GRC Actually Works</h2>
+</div>
+
+<div class="card">
+  <h3>The single most important sentence in GRC</h3>
+  <p style="font-size:22px;color:var(--green);font-weight:700;text-align:center;padding:20px;background:#F2FBF4;border-radius:10px;">"<em>Say what you do. Do what you say. Prove it.</em>"</p>
+
+  <p>Every GRC framework — 27001, 9001, 14001, 45001, SOX, NIST, PCI, HIPAA — fits in those nine words. If you forget every framework citation, remember this and you'll still be ahead of 80% of consultants.</p>
+
+  <ul>
+    <li><strong>"Say what you do"</strong> — policies, procedures, standards, the Statement of Applicability</li>
+    <li><strong>"Do what you say"</strong> — operate the controls consistently, day in, day out</li>
+    <li><strong>"Prove it"</strong> — generate evidence, keep records, allow it to be audited</li>
+  </ul>
+
+  <div class="memory">
+    <span class="badge">Anchor 1</span>
+    <h4>The Trinity</h4>
+    <p><strong>SAY · DO · PROVE.</strong> When in doubt, ask "which of the three is Network18 missing on this topic?" You will find the answer instantly.</p>
+  </div>
+</div>
+
+<div class="card">
+  <h3>The PDCA cycle — the heartbeat of every ISO standard</h3>
+  <p>Every ISO management system standard (27001, 9001, 14001, 45001) runs on PDCA — Plan, Do, Check, Act. It's the cycle. It never stops.</p>
+</div>
+
+<!-- PDCA SVG -->
+<div class="figure">
+  <svg viewBox="0 0 700 450" xmlns="http://www.w3.org/2000/svg">
+    <text x="350" y="26" text-anchor="middle" font-family="Helvetica" font-size="17" font-weight="700" fill="#1A1A1A">The PDCA Cycle — The Heart of ISO</text>
+
+    <!-- Circle of 4 -->
+    <circle cx="350" cy="240" r="160" fill="none" stroke="#888" stroke-width="2" stroke-dasharray="6 4"/>
+
+    <!-- P -->
+    <circle cx="350" cy="100" r="55" fill="#2980B9"/>
+    <text x="350" y="98" text-anchor="middle" font-family="Helvetica" font-size="28" font-weight="800" fill="#fff">P</text>
+    <text x="350" y="120" text-anchor="middle" font-family="Helvetica" font-size="12" font-weight="700" fill="#fff">PLAN</text>
+
+    <!-- D -->
+    <circle cx="490" cy="240" r="55" fill="#27AE60"/>
+    <text x="490" y="238" text-anchor="middle" font-family="Helvetica" font-size="28" font-weight="800" fill="#fff">D</text>
+    <text x="490" y="260" text-anchor="middle" font-family="Helvetica" font-size="12" font-weight="700" fill="#fff">DO</text>
+
+    <!-- C -->
+    <circle cx="350" cy="380" r="55" fill="#E67E22"/>
+    <text x="350" y="378" text-anchor="middle" font-family="Helvetica" font-size="28" font-weight="800" fill="#fff">C</text>
+    <text x="350" y="400" text-anchor="middle" font-family="Helvetica" font-size="12" font-weight="700" fill="#fff">CHECK</text>
+
+    <!-- A -->
+    <circle cx="210" cy="240" r="55" fill="#C0392B"/>
+    <text x="210" y="238" text-anchor="middle" font-family="Helvetica" font-size="28" font-weight="800" fill="#fff">A</text>
+    <text x="210" y="260" text-anchor="middle" font-family="Helvetica" font-size="12" font-weight="700" fill="#fff">ACT</text>
+
+    <!-- Arrows -->
+    <polygon points="430,150 440,140 450,150 440,160" fill="#888"/>
+    <polygon points="440,330 450,340 440,350 430,340" fill="#888"/>
+    <polygon points="260,340 250,350 240,340 250,330" fill="#888"/>
+    <polygon points="250,140 260,150 250,160 240,150" fill="#888"/>
+
+    <!-- Side text -->
+    <text x="350" y="50" text-anchor="middle" font-family="Helvetica" font-size="11" fill="#1B4D7A">Define scope, risks,</text>
+    <text x="350" y="65" text-anchor="middle" font-family="Helvetica" font-size="11" fill="#1B4D7A">objectives, policies</text>
+
+    <text x="595" y="235" text-anchor="middle" font-family="Helvetica" font-size="11" fill="#1B5E20">Implement controls,</text>
+    <text x="595" y="250" text-anchor="middle" font-family="Helvetica" font-size="11" fill="#1B5E20">run operations</text>
+
+    <text x="350" y="430" text-anchor="middle" font-family="Helvetica" font-size="11" fill="#8C4500">Monitor, measure,</text>
+    <text x="350" y="445" text-anchor="middle" font-family="Helvetica" font-size="11" fill="#8C4500">audit, review</text>
+
+    <text x="105" y="235" text-anchor="middle" font-family="Helvetica" font-size="11" fill="#8B1A0E">Fix gaps,</text>
+    <text x="105" y="250" text-anchor="middle" font-family="Helvetica" font-size="11" fill="#8B1A0E">improve, adapt</text>
+  </svg>
+  <div class="figure-caption">PDCA is the operating system. Every ISMS task fits into one of these four boxes.</div>
+</div>
+
+<div class="card">
+  <h4>PDCA mapped to your Year 1 with Network18</h4>
+  <table class="simple">
+    <tr><th>Quarter</th><th>PDCA Phase</th><th>What you're doing at Network18</th></tr>
+    <tr><td>Q1 (M1-3)</td><td>PLAN</td><td>Gap assessment, scope, risk methodology, policy framework drafted</td></tr>
+    <tr><td>Q2 (M4-6)</td><td>DO</td><td>Controls implemented, training rolled out, SoA finalized, TPRM activated</td></tr>
+    <tr><td>Q3 (M7-9)</td><td>CHECK</td><td>Internal audit, KPI/KRI dashboards, management review</td></tr>
+    <tr><td>Q4 (M10-12)</td><td>ACT</td><td>CAPA, CB external audit, certification, continual improvement plan for Year 2</td></tr>
+  </table>
+
+  <div class="memory">
+    <span class="badge">Anchor 2</span>
+    <h4>P-D-C-A</h4>
+    <p><strong>Plan-Do-Check-Act.</strong> The Year 1 calendar IS the PDCA cycle. Q1 you plan. Q2 you do. Q3 you check. Q4 you act. Repeat for Year 2 and 3 (surveillance &amp; recert).</p>
+  </div>
+</div>
+
+<!-- ============================================ -->
+<!-- PART 3 — ISO 27001 DEEP DIVE -->
+<!-- ============================================ -->
+<div class="part-banner">
+  <span class="num">PART 3</span>
+  <h2>ISO/IEC 27001:2022 — Deep Dive</h2>
+</div>
+
+<div class="card">
+  <h3>What ISO 27001 actually is</h3>
+  <p>ISO/IEC 27001 is an <strong>international standard for an Information Security Management System (ISMS)</strong>. It is NOT a list of cyber controls. It is a <em>way of managing</em> cyber security systematically.</p>
+
+  <h4>Two halves of the standard</h4>
+  <table class="simple">
+    <tr><th>Half</th><th>What it contains</th><th>How much it matters</th></tr>
+    <tr><td><strong>Clauses 4-10</strong> (Management System)</td><td>The mandatory operating framework — context, leadership, planning, support, operation, evaluation, improvement</td><td>The <em>spine</em>. Failing here = failing the certification.</td></tr>
+    <tr><td><strong>Annex A</strong> (Controls)</td><td>93 controls in 4 themes. Pick what's applicable to you, document in SoA.</td><td>The <em>muscles</em>. Most audit time spent here.</td></tr>
+  </table>
+
+  <div class="memory">
+    <span class="badge">Anchor 3</span>
+    <h4>"4-10 + 93/4"</h4>
+    <p>ISO 27001:2022 = <strong>Clauses 4 to 10</strong> (the management system) + <strong>93 controls in 4 themes</strong> (Annex A). Memorize these two numbers and you can navigate the entire standard.</p>
+  </div>
+</div>
+
+<!-- ISO ARCHITECTURE SVG -->
+<div class="figure">
+  <svg viewBox="0 0 950 420" xmlns="http://www.w3.org/2000/svg">
+    <text x="475" y="26" text-anchor="middle" font-family="Helvetica" font-size="18" font-weight="700" fill="#1A1A1A">ISO 27001:2022 — The Architecture</text>
+
+    <!-- Two halves -->
+    <rect x="30" y="60" width="420" height="320" rx="10" fill="#E8F3FB" stroke="#2980B9" stroke-width="2"/>
+    <text x="240" y="90" text-anchor="middle" font-family="Helvetica" font-size="15" font-weight="700" fill="#1B4D7A">CLAUSES 4-10 (Mandatory)</text>
+    <text x="240" y="108" text-anchor="middle" font-family="Helvetica" font-size="11" fill="#1B4D7A">The Management System</text>
+
+    <rect x="55" y="125" width="370" height="30" rx="4" fill="#2980B9"/>
+    <text x="65" y="146" font-family="Helvetica" font-size="12" font-weight="700" fill="#fff">4. CONTEXT</text>
+    <text x="175" y="146" font-family="Helvetica" font-size="10" fill="#fff">Stakeholders, scope, boundaries</text>
+
+    <rect x="55" y="160" width="370" height="30" rx="4" fill="#2980B9"/>
+    <text x="65" y="181" font-family="Helvetica" font-size="12" font-weight="700" fill="#fff">5. LEADERSHIP</text>
+    <text x="175" y="181" font-family="Helvetica" font-size="10" fill="#fff">Policy, roles, top-management commit</text>
+
+    <rect x="55" y="195" width="370" height="30" rx="4" fill="#2980B9"/>
+    <text x="65" y="216" font-family="Helvetica" font-size="12" font-weight="700" fill="#fff">6. PLANNING</text>
+    <text x="175" y="216" font-family="Helvetica" font-size="10" fill="#fff">Risk assessment, risk treatment, SoA, objectives</text>
+
+    <rect x="55" y="230" width="370" height="30" rx="4" fill="#2980B9"/>
+    <text x="65" y="251" font-family="Helvetica" font-size="12" font-weight="700" fill="#fff">7. SUPPORT</text>
+    <text x="175" y="251" font-family="Helvetica" font-size="10" fill="#fff">Resources, competence, awareness, documents</text>
+
+    <rect x="55" y="265" width="370" height="30" rx="4" fill="#2980B9"/>
+    <text x="65" y="286" font-family="Helvetica" font-size="12" font-weight="700" fill="#fff">8. OPERATION</text>
+    <text x="175" y="286" font-family="Helvetica" font-size="10" fill="#fff">Operational planning, risk assessment, treatment</text>
+
+    <rect x="55" y="300" width="370" height="30" rx="4" fill="#2980B9"/>
+    <text x="65" y="321" font-family="Helvetica" font-size="12" font-weight="700" fill="#fff">9. PERFORMANCE</text>
+    <text x="175" y="321" font-family="Helvetica" font-size="10" fill="#fff">Monitoring, internal audit, mgmt review</text>
+
+    <rect x="55" y="335" width="370" height="30" rx="4" fill="#2980B9"/>
+    <text x="65" y="356" font-family="Helvetica" font-size="12" font-weight="700" fill="#fff">10. IMPROVEMENT</text>
+    <text x="175" y="356" font-family="Helvetica" font-size="10" fill="#fff">Non-conformity &amp; corrective action</text>
+
+    <!-- Annex A -->
+    <rect x="480" y="60" width="440" height="320" rx="10" fill="#F2FBF4" stroke="#27AE60" stroke-width="2"/>
+    <text x="700" y="90" text-anchor="middle" font-family="Helvetica" font-size="15" font-weight="700" fill="#1B5E20">ANNEX A — 93 Controls</text>
+    <text x="700" y="108" text-anchor="middle" font-family="Helvetica" font-size="11" fill="#1B5E20">Pick the applicable ones (your SoA)</text>
+
+    <rect x="505" y="130" width="195" height="115" rx="6" fill="#fff" stroke="#2980B9"/>
+    <text x="602" y="155" text-anchor="middle" font-family="Helvetica" font-size="13" font-weight="700" fill="#2980B9">A.5 ORGANIZATIONAL</text>
+    <text x="602" y="178" text-anchor="middle" font-family="Helvetica" font-size="22" font-weight="800" fill="#2980B9">37</text>
+    <text x="602" y="195" text-anchor="middle" font-family="Helvetica" font-size="10" fill="#555">controls</text>
+    <text x="602" y="215" text-anchor="middle" font-family="Helvetica" font-size="9" fill="#888">Policies, suppliers, classification,</text>
+    <text x="602" y="228" text-anchor="middle" font-family="Helvetica" font-size="9" fill="#888">incident mgmt, BCM, legal</text>
+
+    <rect x="710" y="130" width="195" height="115" rx="6" fill="#fff" stroke="#27AE60"/>
+    <text x="807" y="155" text-anchor="middle" font-family="Helvetica" font-size="13" font-weight="700" fill="#27AE60">A.6 PEOPLE</text>
+    <text x="807" y="178" text-anchor="middle" font-family="Helvetica" font-size="22" font-weight="800" fill="#27AE60">8</text>
+    <text x="807" y="195" text-anchor="middle" font-family="Helvetica" font-size="10" fill="#555">controls</text>
+    <text x="807" y="215" text-anchor="middle" font-family="Helvetica" font-size="9" fill="#888">Background checks, awareness,</text>
+    <text x="807" y="228" text-anchor="middle" font-family="Helvetica" font-size="9" fill="#888">disciplinary, remote work, exit</text>
+
+    <rect x="505" y="255" width="195" height="115" rx="6" fill="#fff" stroke="#E67E22"/>
+    <text x="602" y="280" text-anchor="middle" font-family="Helvetica" font-size="13" font-weight="700" fill="#E67E22">A.7 PHYSICAL</text>
+    <text x="602" y="303" text-anchor="middle" font-family="Helvetica" font-size="22" font-weight="800" fill="#E67E22">14</text>
+    <text x="602" y="320" text-anchor="middle" font-family="Helvetica" font-size="10" fill="#555">controls</text>
+    <text x="602" y="340" text-anchor="middle" font-family="Helvetica" font-size="9" fill="#888">Secure areas, equipment,</text>
+    <text x="602" y="353" text-anchor="middle" font-family="Helvetica" font-size="9" fill="#888">disposal, clear desk, cabling</text>
+
+    <rect x="710" y="255" width="195" height="115" rx="6" fill="#fff" stroke="#6F2DA8"/>
+    <text x="807" y="280" text-anchor="middle" font-family="Helvetica" font-size="13" font-weight="700" fill="#6F2DA8">A.8 TECHNOLOGICAL</text>
+    <text x="807" y="303" text-anchor="middle" font-family="Helvetica" font-size="22" font-weight="800" fill="#6F2DA8">34</text>
+    <text x="807" y="320" text-anchor="middle" font-family="Helvetica" font-size="10" fill="#555">controls</text>
+    <text x="807" y="340" text-anchor="middle" font-family="Helvetica" font-size="9" fill="#888">Access, crypto, network, dev,</text>
+    <text x="807" y="353" text-anchor="middle" font-family="Helvetica" font-size="9" fill="#888">cloud, logging, vulnerability</text>
+
+    <text x="475" y="405" text-anchor="middle" font-family="Helvetica" font-size="12" font-style="italic" fill="#888">37 + 8 + 14 + 34 = 93 controls</text>
+  </svg>
+  <div class="figure-caption">Left half = how you manage. Right half = what you do. Both must work together.</div>
+</div>
+
+<!-- THE 4 THEMES OF CONTROLS -->
+<div class="card">
+  <h3>The 93 controls — broken down so you can talk to any of them</h3>
+
+  <h4>A.5 — Organizational controls (37)</h4>
+  <p>These are about how the organization runs information security. Policies, roles, supplier governance, classification, incidents, BCM, legal &amp; compliance.</p>
+
+  <div class="net18">
+    <strong>What this looks like at Network18</strong>
+    <ul>
+      <li><strong>A.5.1</strong> Information Security Policy — top-level, signed by CEO/CIO</li>
+      <li><strong>A.5.10</strong> Acceptable Use Policy — for ~6,200 employees</li>
+      <li><strong>A.5.12</strong> Classification of information — broadcast content (confidential pre-publication), subscriber PII, financial data</li>
+      <li><strong>A.5.19-23</strong> Supplier relationships — ties directly to TPRM program</li>
+      <li><strong>A.5.24-28</strong> Incident management — ServiceNow SIR integration, CERT-In 6-hour reporting workflow</li>
+      <li><strong>A.5.29-30</strong> Information security during disruption — BCP for broadcast playout (4-hour RTO)</li>
+      <li><strong>A.5.31-37</strong> Compliance — SEBI, IT Act, DPDPA 2023, Cable TV Act</li>
+    </ul>
+  </div>
+
+  <h4>A.6 — People controls (8)</h4>
+  <p>The smallest theme but often the highest-risk. Humans are the weakest link.</p>
+
+  <div class="net18">
+    <strong>What this looks like at Network18</strong>
+    <ul>
+      <li><strong>A.6.1</strong> Screening — pre-employment background checks (criminal, education, employment, address). Critical for journalists with access to pre-publication content.</li>
+      <li><strong>A.6.2</strong> Terms &amp; conditions of employment — confidentiality clauses, IP assignment</li>
+      <li><strong>A.6.3</strong> Awareness, education, training — annual mandatory training (target 95%+ completion)</li>
+      <li><strong>A.6.4</strong> Disciplinary process — formal process for security violations</li>
+      <li><strong>A.6.5</strong> Termination &amp; change of responsibilities — exit checklist (revoke access in 24h, return assets, debrief)</li>
+      <li><strong>A.6.6</strong> Confidentiality / NDAs — including freelance journalists, stringers</li>
+      <li><strong>A.6.7</strong> Remote working — work-from-home policy, VPN, device management</li>
+      <li><strong>A.6.8</strong> Information security event reporting — how a journalist or admin reports a suspected incident</li>
+    </ul>
+  </div>
+
+  <h4>A.7 — Physical controls (14)</h4>
+  <p>Securing the buildings, equipment, and physical environment.</p>
+
+  <div class="net18">
+    <strong>What this looks like at Network18 (Mumbai + Noida)</strong>
+    <ul>
+      <li><strong>A.7.1-4</strong> Secure areas, perimeters, entry controls — badge access, biometrics for data centre + broadcast control rooms</li>
+      <li><strong>A.7.5-8</strong> Physical protection — protection against fire, flood (Mumbai monsoon risk), tampering</li>
+      <li><strong>A.7.9</strong> Security of assets off-premises — laptops carried by reporters in the field</li>
+      <li><strong>A.7.10</strong> Storage media — handling of broadcast tapes, drives</li>
+      <li><strong>A.7.11</strong> Supporting utilities — UPS, generator backup for broadcast continuity</li>
+      <li><strong>A.7.12</strong> Cabling security</li>
+      <li><strong>A.7.13-14</strong> Equipment maintenance &amp; secure disposal — degaussing/destruction of drives</li>
+    </ul>
+  </div>
+
+  <h4>A.8 — Technological controls (34)</h4>
+  <p>The biggest theme. Where most of cyber lives. Aligns with NIST CSF and CIS Controls.</p>
+
+  <div class="net18">
+    <strong>What this looks like at Network18</strong>
+    <ul>
+      <li><strong>A.8.1-4</strong> User endpoint devices, privileged access, info access restriction — Okta SSO + MFA, Privileged Access Management (PAM)</li>
+      <li><strong>A.8.5</strong> Secure authentication — MFA on all critical systems</li>
+      <li><strong>A.8.6-7</strong> Capacity, malware — 4,800 endpoint EDR (CrowdStrike)</li>
+      <li><strong>A.8.8-9</strong> Vulnerability management, configuration — feeds W2 workstream</li>
+      <li><strong>A.8.10-11</strong> Information deletion, data masking — DPDPA-driven masking of subscriber data</li>
+      <li><strong>A.8.12</strong> Data leakage prevention — Symantec DLP, Microsoft Purview</li>
+      <li><strong>A.8.13</strong> Backup — broadcast tape archives, OTT content backup</li>
+      <li><strong>A.8.14</strong> Redundancy — Active-active broadcast playout</li>
+      <li><strong>A.8.15-17</strong> Logging, monitoring, clock sync — feeds W1 SOC</li>
+      <li><strong>A.8.18-19</strong> Privileged utility programs, installation on systems — application whitelisting</li>
+      <li><strong>A.8.20-22</strong> Network security, network controls, segregation — Mumbai/Noida WAN, broadcast network isolation</li>
+      <li><strong>A.8.23-24</strong> Web filtering, cryptography — TLS 1.3, AES-256, key mgmt</li>
+      <li><strong>A.8.25-31</strong> Secure development — feeds W2 SAST/SCR programme</li>
+      <li><strong>A.8.32-33</strong> Change management, test data — production change ARB</li>
+      <li><strong>A.8.34</strong> Audit testing — controls during audit</li>
+    </ul>
+  </div>
+
+  <div class="memory">
+    <span class="badge">Anchor 4</span>
+    <h4>"OPPT" — Organizational, People, Physical, Tech</h4>
+    <p><strong>O-P-P-T = 37, 8, 14, 34 = 93.</strong> Remember the order (think "OPT" plus another P inserted). When auditors quote a control like "A.8.5", you instantly know it's a <em>tech</em> control because A.8 = Tech.</p>
+  </div>
+</div>
+
+<!-- THE 11 NEW CONTROLS -->
+<div class="card">
+  <h3>The 11 new controls in ISO 27001:2022</h3>
+  <p>Network18's previous certification (if they had one) was on the 2013 version. Many of their existing controls may not cover these new requirements. <strong>This is where most gap-assessment findings will live.</strong></p>
+
+  <table class="simple">
+    <tr><th>#</th><th>Control</th><th>What it requires</th><th>Network18 likely state</th></tr>
+    <tr><td>A.5.7</td><td>Threat Intelligence</td><td>Collect &amp; analyze threat intel relevant to your industry</td><td>Will exist (W1 TI Analyst) — needs documentation</td></tr>
+    <tr><td>A.5.23</td><td>Information security for use of cloud services</td><td>Cloud-specific security including procurement, exit, monitoring</td><td>Gap — needs formal cloud sec policy</td></tr>
+    <tr><td>A.5.30</td><td>ICT readiness for business continuity</td><td>IT-specific BCP — not just any BCP</td><td>Likely partial — broadcast BCP exists, corporate ICT BCP weak</td></tr>
+    <tr><td>A.7.4</td><td>Physical security monitoring</td><td>Monitoring premises for unauthorized access</td><td>Likely covered (CCTV) — needs evidence chain</td></tr>
+    <tr><td>A.8.9</td><td>Configuration management</td><td>Documented secure baselines + drift detection</td><td>Partial — feeds W2</td></tr>
+    <tr><td>A.8.10</td><td>Information deletion</td><td>Secure deletion when no longer needed (DPDPA driver)</td><td>Gap — DPDPA 2023 brings this into sharp focus</td></tr>
+    <tr><td>A.8.11</td><td>Data masking</td><td>Mask sensitive data in non-prod, where appropriate</td><td>Gap in most enterprises</td></tr>
+    <tr><td>A.8.12</td><td>Data leakage prevention</td><td>Implement DLP measures</td><td>Tool exists, policy alignment needed</td></tr>
+    <tr><td>A.8.16</td><td>Monitoring activities</td><td>Networks, systems, applications monitored</td><td>Covered via W1 SOC</td></tr>
+    <tr><td>A.8.23</td><td>Web filtering</td><td>Restrict access to malicious / inappropriate sites</td><td>Tool exists — policy needed</td></tr>
+    <tr><td>A.8.28</td><td>Secure coding</td><td>Secure coding practices in dev lifecycle</td><td>Feeds W2 SCR programme</td></tr>
+  </table>
+
+  <div class="info">
+    <strong>Why this matters:</strong> Three of these (A.5.7, A.5.23, A.5.30) link directly to the <em>cyber agenda</em> — threat intelligence, cloud, and ICT continuity. Network18 will rely on Workstreams 1 and 2 for the operational evidence; your job (W3) is to document and prove they exist.
+  </div>
+</div>
+
+<!-- THE STATEMENT OF APPLICABILITY -->
+<div class="card">
+  <h3>The Statement of Applicability (SoA) — your most important document</h3>
+  <p>The SoA is a table listing all 93 controls, with three columns for each:</p>
+  <ol>
+    <li><strong>Applicable? Yes/No</strong></li>
+    <li><strong>If Yes</strong> — justification + implementation status + reference to control description</li>
+    <li><strong>If No</strong> — strong justification why it doesn't apply</li>
+  </ol>
+
+  <div class="cyber-ex" style="background:#F2FBF4;border-left:5px solid #27AE60;">
+    <strong style="color:#1B5E20;">Sample SoA rows for Network18</strong>
+    <table class="simple" style="margin-top:8px;">
+      <tr><th>Control</th><th>Applicable?</th><th>Justification</th><th>Status</th></tr>
+      <tr><td>A.5.1 Policies for information security</td><td>Yes</td><td>Required for any organization</td><td>Implemented — ISMS Policy v3.2, board-approved Jun 2026</td></tr>
+      <tr><td>A.5.23 Information security for use of cloud services</td><td>Yes</td><td>Network18 uses AWS, Azure, GCP</td><td>In progress — cloud security standard drafted, approval pending</td></tr>
+      <tr><td>A.7.10 Storage media</td><td>Yes</td><td>Broadcast tape archives in Mumbai vault</td><td>Implemented — Media handling SOP v2.0</td></tr>
+      <tr><td>A.8.32 Change management</td><td>Yes</td><td>Required for production systems</td><td>Implemented — ServiceNow CHG module, weekly ARB</td></tr>
+      <tr><td>A.5.20 Addressing information security in supplier agreements</td><td>Yes</td><td>340 vendors</td><td>In progress — contract clause refresh covering 130/340</td></tr>
+    </table>
+  </div>
+
+  <div class="warn">
+    <strong>SoA mistakes that fail audits:</strong>
+    <ul>
+      <li>Marking a control "Not Applicable" without justification</li>
+      <li>Justification is generic ("not relevant") rather than specific ("we don't operate industrial control systems")</li>
+      <li>"Applicable" but with no evidence of implementation</li>
+      <li>SoA not updated when scope or risk changes</li>
+      <li>SoA version not aligned to current ISMS Policy version</li>
+    </ul>
+  </div>
+
+  <div class="memory">
+    <span class="badge">Anchor 5</span>
+    <h4>The SoA is the audit's centre of gravity</h4>
+    <p>External auditors spend more time on the SoA than any other document. Every "Yes" needs evidence of operation. Every "No" needs strong justification. Walk in knowing your SoA cold.</p>
+  </div>
+</div>
+
+<!-- ============================================ -->
+<!-- PART 4 — RISK METHODOLOGY -->
+<!-- ============================================ -->
+<div class="part-banner">
+  <span class="num">PART 4</span>
+  <h2>Risk Methodology — How the ISMS Actually Thinks</h2>
+</div>
+
+<div class="card">
+  <h3>The risk cycle — IATM</h3>
+  <p>ISO 27001 Clause 6.1.2 requires a documented risk assessment methodology. The cycle has 4 stages.</p>
+
+  <div class="memory">
+    <span class="badge">Anchor 6</span>
+    <h4>I-A-T-M</h4>
+    <p><strong>Identify · Assess · Treat · Monitor.</strong> Every information security risk goes through these four stages. If a risk is missing one of the four, the methodology is broken.</p>
+  </div>
+
+  <h4>1. IDENTIFY — what could go wrong?</h4>
+  <p>Two valid approaches (use both):</p>
+  <ul>
+    <li><strong>Asset-based:</strong> List assets (customer database, broadcast playout system, MoneyControl APIs). For each, list threats (ransomware, insider, vendor breach). For each threat-asset pair, that's a risk.</li>
+    <li><strong>Scenario-based:</strong> List business-relevant scenarios ("CNBC TV18 goes off air for 2 hours due to cyber"), then work backwards to assets and threats.</li>
+  </ul>
+
+  <div class="net18">
+    <strong>Network18 indicative top-10 risks (Year 1 baseline)</strong>
+    <ol>
+      <li>Ransomware encryption of broadcast playout systems → off-air event</li>
+      <li>Insider exfiltration of pre-publication market-sensitive content (MoneyControl)</li>
+      <li>Third-party SaaS breach exposing subscriber PII (DPDPA notification trigger)</li>
+      <li>Compromise of journalist source-protection emails</li>
+      <li>Defacement / unauthorized publishing on News18 platforms</li>
+      <li>OTT/VOOT user-credential stuffing leading to account takeover</li>
+      <li>Ad-tech partner breach affecting user tracking data</li>
+      <li>Inability to comply with CERT-In 6-hour breach reporting</li>
+      <li>DDoS during high-traffic event (election results, IPL, breaking news)</li>
+      <li>SEBI material-event disclosure failure post-cyber incident</li>
+    </ol>
+  </div>
+
+  <h4>2. ASSESS — how big is the risk?</h4>
+  <p>Score by Likelihood × Impact. Most enterprises use a 5x5 matrix. Network18 should pre-define scoring criteria so two analysts assess the same risk identically.</p>
+
+  <table class="simple">
+    <tr><th>Score</th><th>Likelihood criteria</th><th>Impact criteria (financial)</th></tr>
+    <tr><td>1 — Rare</td><td>Less than once in 10 years</td><td>&lt; ₹50 lakh</td></tr>
+    <tr><td>2 — Unlikely</td><td>Once in 5-10 years</td><td>₹50 lakh - ₹2 Cr</td></tr>
+    <tr><td>3 — Possible</td><td>Once in 2-5 years</td><td>₹2 Cr - ₹10 Cr</td></tr>
+    <tr><td>4 — Likely</td><td>Once a year</td><td>₹10 Cr - ₹50 Cr</td></tr>
+    <tr><td>5 — Almost Certain</td><td>Multiple times per year</td><td>&gt; ₹50 Cr</td></tr>
+  </table>
+
+  <h4>3. TREAT — what do we do about it?</h4>
+  <p>Four choices (5 if you count "Re-cost"):</p>
+  <ul>
+    <li><strong>Reduce (mitigate)</strong> — add controls. Most common.</li>
+    <li><strong>Retain (accept)</strong> — knowingly keep the risk. Requires sign-off.</li>
+    <li><strong>Refuse (avoid)</strong> — stop the activity that creates the risk.</li>
+    <li><strong>Reassign (transfer)</strong> — insurance, contractual indemnity, outsourcing.</li>
+  </ul>
+
+  <div class="memory">
+    <span class="badge">Anchor 7</span>
+    <h4>4 R's of risk treatment</h4>
+    <p><strong>Reduce · Retain · Refuse · Reassign.</strong> Every risk on Network18's register must have a treatment chosen, documented, owned, and dated.</p>
+  </div>
+
+  <h4>4. MONITOR — is it still true?</h4>
+  <p>Risks change. Threats evolve. Treatments may stop working. Monitoring requires:</p>
+  <ul>
+    <li>KRIs (Key Risk Indicators) attached to top risks — leading indicators</li>
+    <li>Quarterly risk register review (formal)</li>
+    <li>Trigger-based review (incident, regulation change, business change)</li>
+    <li>Management review at least annually (Clause 9.3)</li>
+  </ul>
+</div>
+
+<!-- RISK REGISTER EXAMPLE -->
+<div class="card">
+  <h3>Sample risk register entry — fully worked example</h3>
+
+  <table class="simple">
+    <tr><th>Field</th><th>Example value</th></tr>
+    <tr><td>Risk ID</td><td>RISK-N18-2026-007</td></tr>
+    <tr><td>Risk title</td><td>Ransomware affecting broadcast playout systems leading to off-air event</td></tr>
+    <tr><td>Asset(s)</td><td>Broadcast playout servers (Mumbai primary, Noida DR), tape automation system</td></tr>
+    <tr><td>Threat</td><td>Targeted ransomware (e.g., Mallox, BlackCat) gaining initial access via supplier/RDP</td></tr>
+    <tr><td>Vulnerability</td><td>Legacy Windows Server 2016 playout systems with delayed patching cycle; flat broadcast network</td></tr>
+    <tr><td>Inherent Likelihood</td><td>4 (Likely)</td></tr>
+    <tr><td>Inherent Impact</td><td>5 (Catastrophic — off-air revenue + reputational)</td></tr>
+    <tr><td>Inherent Risk Score</td><td>20 (Extreme)</td></tr>
+    <tr><td>Existing controls</td><td>EDR (CrowdStrike), network segmentation (partial), 4-hour RTO with Noida DR, weekly backups</td></tr>
+    <tr><td>Control effectiveness</td><td>Partial — DR tested annually but partial-failover only; segmentation incomplete</td></tr>
+    <tr><td>Residual Likelihood</td><td>3 (Possible)</td></tr>
+    <tr><td>Residual Impact</td><td>4 (Major — assuming DR holds)</td></tr>
+    <tr><td>Residual Risk Score</td><td>12 (High)</td></tr>
+    <tr><td>Risk appetite for this category</td><td>Score ≤ 8 (Medium) — current residual exceeds appetite</td></tr>
+    <tr><td>Treatment decision</td><td>REDUCE — additional controls to bring to Medium</td></tr>
+    <tr><td>Treatment plan</td><td>(1) Complete network segmentation Q2 (2) Move playout to supported OS Q3 (3) Full failover test Q4 (4) Immutable backups Q2</td></tr>
+    <tr><td>Owner</td><td>Head of Broadcast IT</td></tr>
+    <tr><td>Target residual</td><td>Likelihood 2, Impact 4, Score 8 (Medium)</td></tr>
+    <tr><td>Target date</td><td>2026-12-31</td></tr>
+    <tr><td>KRIs</td><td>Critical vulns &gt;30 days on playout (target 0), Days since last full DR test (target ≤90)</td></tr>
+    <tr><td>Last review</td><td>2026-05-01 (quarterly)</td></tr>
+    <tr><td>Status</td><td>Treatment in progress, on plan</td></tr>
+  </table>
+
+  <div class="key">
+    <strong>This is what a real risk register entry looks like.</strong> Network18 will have ~85 of these. Build one excellently in week 4, use it as the template for the rest.
+  </div>
+</div>
+
+<!-- ============================================ -->
+<!-- PART 5 — 4-PHASE IMPLEMENTATION (DETAILED) -->
+<!-- ============================================ -->
+<div class="part-banner">
+  <span class="num">PART 5</span>
+  <h2>4-Phase Implementation — Step by Step</h2>
+</div>
+
+<!-- PHASE 1 -->
+<div class="card">
+  <h3>Phase 1 — Gap Assessment (Months 1-2)</h3>
+  <p class="subtitle">Find out where Network18 actually stands</p>
+
+  <h4>Activities — week by week</h4>
+  <table class="simple">
+    <tr><th>Week</th><th>Activity</th><th>Deliverable</th></tr>
+    <tr><td>1</td><td>Kickoff, charter, stakeholder map, document request list (DRL)</td><td>Project Charter; signed DRL</td></tr>
+    <tr><td>2</td><td>Scope-defining workshops — what's in, what's out</td><td>Scope Statement (draft)</td></tr>
+    <tr><td>3</td><td>Document review — existing policies, prior audit reports, risk register</td><td>Document inventory + initial observations</td></tr>
+    <tr><td>4</td><td>Workshops 1-4: organizational, people, physical, technological</td><td>Workshop notes + control-by-control current state</td></tr>
+    <tr><td>5</td><td>Workshops 5-8: BCP, supplier, incident, awareness</td><td>Continued</td></tr>
+    <tr><td>6</td><td>Sample testing — pull evidence for 25-30 controls</td><td>Evidence test results</td></tr>
+    <tr><td>7</td><td>Synthesis — control maturity rating, gap classification</td><td>Draft Gap Report</td></tr>
+    <tr><td>8</td><td>Validation workshop with Network18 CISO + draft remediation plan</td><td>Final Gap Report; Remediation Roadmap</td></tr>
+  </table>
+
+  <h4>The Document Request List — what we ask for on day 1</h4>
+  <p>Send this list to Network18 ISMS owner within 24 hours of kickoff. Realistic expectation: you'll get 60% in week 1, 90% by week 3.</p>
+
+  <table class="simple">
+    <tr><th>#</th><th>Document</th><th>Status (track)</th></tr>
+    <tr><td>1</td><td>Current information security policy &amp; sub-policies</td><td></td></tr>
+    <tr><td>2</td><td>Previous ISO 27001 certificate &amp; audit reports (if applicable)</td><td></td></tr>
+    <tr><td>3</td><td>Current risk register</td><td></td></tr>
+    <tr><td>4</td><td>Asset register (CMDB extract)</td><td></td></tr>
+    <tr><td>5</td><td>Network &amp; data flow diagrams</td><td></td></tr>
+    <tr><td>6</td><td>Org chart with security/IT roles</td><td></td></tr>
+    <tr><td>7</td><td>Last 24 months of incident records</td><td></td></tr>
+    <tr><td>8</td><td>Awareness training records</td><td></td></tr>
+    <tr><td>9</td><td>BCP / DR plans &amp; latest test results</td><td></td></tr>
+    <tr><td>10</td><td>Vendor list with contracts &amp; security review records</td><td></td></tr>
+    <tr><td>11</td><td>Access provisioning &amp; review records (last 12 months)</td><td></td></tr>
+    <tr><td>12</td><td>Change management records</td><td></td></tr>
+    <tr><td>13</td><td>Vulnerability scan reports &amp; pentest reports (last 12 months)</td><td></td></tr>
+    <tr><td>14</td><td>Internal audit reports (any framework)</td><td></td></tr>
+    <tr><td>15</td><td>Regulatory correspondence (SEBI, CERT-In, MeitY)</td><td></td></tr>
+    <tr><td>16</td><td>Management review meeting minutes (last 24 months)</td><td></td></tr>
+    <tr><td>17</td><td>Compliance obligations register (if exists)</td><td></td></tr>
+    <tr><td>18</td><td>Job descriptions for security roles</td><td></td></tr>
+    <tr><td>19</td><td>HR procedures: onboarding, exit, background checks</td><td></td></tr>
+    <tr><td>20</td><td>Physical security floor plans &amp; access logs sample</td><td></td></tr>
+  </table>
+
+  <h4>The Gap Report structure</h4>
+  <ol>
+    <li><strong>Executive Summary</strong> — 1 page. Maturity verdict, top 3 risks, certification feasibility, indicative timeline &amp; effort.</li>
+    <li><strong>Methodology</strong> — what we did, what we sampled, who we spoke to.</li>
+    <li><strong>Current State</strong> — by Clause 4-10 then by each Annex A theme.</li>
+    <li><strong>Heatmap</strong> — maturity by domain (5-level scale).</li>
+    <li><strong>Gap Register</strong> — every gap individually identified, classified, sized.</li>
+    <li><strong>Remediation Roadmap</strong> — sequenced, costed, with owners.</li>
+    <li><strong>Risk Snapshot</strong> — top 10 risks identified during the assessment.</li>
+    <li><strong>Quick Wins</strong> — what they can do in the first 30 days.</li>
+  </ol>
+</div>
+
+<!-- PHASE 2 -->
+<div class="card">
+  <h3>Phase 2 — Build &amp; Remediate (Months 3-6)</h3>
+  <p class="subtitle">Build the ISMS, close the gaps</p>
+
+  <h4>Workstreams in parallel</h4>
+
+  <h5>Stream A: Policy Framework</h5>
+  <p>Build the integrated policy hierarchy. Target: 30 documents (1 Policy + 12 sub-policies + 17 supporting procedures).</p>
+  <ul>
+    <li><strong>Tier 1 (Policy):</strong> Information Security Policy — board-approved</li>
+    <li><strong>Tier 2 (Sub-policies):</strong> Access Control · Cryptography · Asset Management · Supplier · BCP · Incident · HR Security · Acceptable Use · Cloud Security · Data Classification · Physical Security · Logging &amp; Monitoring</li>
+    <li><strong>Tier 3 (Procedures):</strong> User Onboarding · Access Review · Incident Response · Vulnerability Mgmt · Change Mgmt · Backup &amp; Recovery · BCP Testing · Vendor Onboarding · etc.</li>
+  </ul>
+
+  <h5>Stream B: Risk &amp; SoA</h5>
+  <p>Build risk register (~85 risks), Statement of Applicability covering all 93 controls.</p>
+
+  <h5>Stream C: Operational Controls</h5>
+  <p>Close gaps identified in Phase 1. Network18 IT/Sec teams own implementation; we coach, track, and assure.</p>
+
+  <div class="net18">
+    <strong>Indicative top-15 gaps to close at Network18</strong>
+    <ol>
+      <li>Asset inventory incomplete — broadcast/OT assets not in CMDB</li>
+      <li>SoA does not exist or is stale</li>
+      <li>Risk treatment plans missing for ~40% of identified risks</li>
+      <li>Access reviews conducted ad-hoc rather than quarterly</li>
+      <li>Cloud security standard missing (new control A.5.23)</li>
+      <li>Information deletion procedure missing (A.8.10 — DPDPA driver)</li>
+      <li>BCP for ICT services partial (A.5.30)</li>
+      <li>Incident root-cause analysis weak</li>
+      <li>Vendor security clauses not in older contracts (~210 of 340)</li>
+      <li>Training completion at ~78% — target 95%</li>
+      <li>Management review minutes thin / infrequent</li>
+      <li>Cryptographic key management standard not documented</li>
+      <li>Physical security access log retention &lt; required</li>
+      <li>Secure development standards not enforced consistently</li>
+      <li>Compliance obligations register doesn't exist or is incomplete</li>
+    </ol>
+  </div>
+
+  <h5>Stream D: Awareness &amp; Training</h5>
+  <p>Roll out training to all 6,200 employees. Cadence: mandatory annual + role-based for high-risk roles (admins, journalists with pre-pub access, finance, HR).</p>
+
+  <h5>Stream E: Records &amp; Evidence Discipline</h5>
+  <p>Set up the evidence repository (typically SharePoint or a GRC tool — Helena had no system, Network18 likely similar). Define retention, naming, ownership.</p>
+</div>
+
+<!-- PHASE 3 -->
+<div class="card">
+  <h3>Phase 3 — Internal Audit &amp; Management Review (Months 7-9)</h3>
+  <p class="subtitle">Find issues before the external auditor does</p>
+
+  <h4>Internal Audit (Clause 9.2)</h4>
+  <p>Required by 27001. Must cover all clauses and all applicable controls at least once before the certification audit. Can be performed by:</p>
+  <ul>
+    <li>Network18's internal audit function (if competent and independent)</li>
+    <li>PwC — acting as outsourced internal audit (we cannot do this if we're also doing the cert audit, but we're not — the CB does that, so we're fine)</li>
+    <li>A third firm</li>
+  </ul>
+
+  <h4>Internal audit programme — 6-week sprint</h4>
+  <table class="simple">
+    <tr><th>Week</th><th>Activity</th></tr>
+    <tr><td>1</td><td>Audit plan, audit criteria, scope, schedule communicated</td></tr>
+    <tr><td>2-3</td><td>Fieldwork — Mumbai (Clauses 4-7, A.5, A.6)</td></tr>
+    <tr><td>3-4</td><td>Fieldwork — Mumbai (A.7, A.8) + Noida (sampling)</td></tr>
+    <tr><td>4-5</td><td>Fieldwork — Clauses 8-10, evidence sampling</td></tr>
+    <tr><td>5</td><td>Draft findings, calibration with PwC team</td></tr>
+    <tr><td>6</td><td>Closing meeting, final report, CAPA plan</td></tr>
+  </table>
+
+  <h4>Audit Finding Classifications</h4>
+  <ul>
+    <li><strong>Major NC (Non-Conformity):</strong> a clause/control is not implemented or has serious systemic failure. <em>Blocks certification.</em></li>
+    <li><strong>Minor NC:</strong> isolated lapse in an otherwise functioning process. <em>Does not block certification but must be addressed.</em></li>
+    <li><strong>OFI (Opportunity for Improvement):</strong> works but could be better. <em>Suggested, not mandatory.</em></li>
+  </ul>
+
+  <div class="warn">
+    <strong>The aim:</strong> Zero Major NCs going into external audit. Maximum 5-8 Minor NCs is normal and acceptable. If internal audit finds 0 issues, the audit was probably superficial.
+  </div>
+
+  <h4>Management Review Meeting (Clause 9.3) — what gets reviewed</h4>
+  <p>Required at least annually. Network18 should run quarterly (better for the audit narrative).</p>
+  <ol>
+    <li>Status of actions from previous reviews</li>
+    <li>Changes in external/internal issues (regulations, tech, business)</li>
+    <li>ISMS performance: NCs, results of monitoring/measurement, audit findings, control effectiveness</li>
+    <li>Feedback from interested parties (regulators, customers, board)</li>
+    <li>Risk assessment results &amp; status of risk treatment</li>
+    <li>Opportunities for continual improvement</li>
+  </ol>
+  <p>Minutes must record decisions made. Empty minutes = failed audit.</p>
+</div>
+
+<!-- PHASE 4 -->
+<div class="card">
+  <h3>Phase 4 — External Audit &amp; Certification (Months 10-11)</h3>
+  <p class="subtitle">The big moment — Certification Body audit</p>
+
+  <h4>Stage 1 vs Stage 2 — what's the difference?</h4>
+
+  <div class="two-col">
+    <div class="card" style="background:#E8F3FB;margin:0;">
+      <h4>Stage 1 — Readiness Audit</h4>
+      <ul>
+        <li>Mostly document review</li>
+        <li>3-5 days typically</li>
+        <li>Off-site mostly, some on-site</li>
+        <li>Output: list of "areas of concern" + go/no-go for Stage 2</li>
+        <li>You can have non-conformities here without failing the path</li>
+      </ul>
+      <p style="font-style:italic;font-size:13px;color:#1B4D7A;">"Are you ready on paper?"</p>
+    </div>
+    <div class="card" style="background:#FDECEA;margin:0;">
+      <h4>Stage 2 — Certification Audit</h4>
+      <ul>
+        <li>On-site (Mumbai + Noida sampling)</li>
+        <li>5-10 days typically</li>
+        <li>Witness controls operating</li>
+        <li>Interview staff</li>
+        <li>Sample evidence aggressively</li>
+        <li>Output: certification decision</li>
+      </ul>
+      <p style="font-style:italic;font-size:13px;color:#8B1A0E;">"Are you doing what you say?"</p>
+    </div>
+  </div>
+
+  <div class="memory">
+    <span class="badge">Anchor 8</span>
+    <h4>Stage 1 = paper. Stage 2 = practice.</h4>
+    <p>Stage 1 audits your documents. Stage 2 audits whether you actually live by them. Both must pass.</p>
+  </div>
+
+  <h4>What the Stage 2 auditor will physically do</h4>
+  <ol>
+    <li><strong>Opening meeting</strong> — confirm scope, timetable, expectations.</li>
+    <li><strong>Top management interview</strong> — verify leadership commitment (Clause 5).</li>
+    <li><strong>Document review on-site</strong> — SoA, risk register, policies, recent records.</li>
+    <li><strong>Control walkthroughs</strong> — pick 30-50 controls, walk through end-to-end with operators.</li>
+    <li><strong>Evidence sampling</strong> — "show me the last 5 access reviews", "show me 3 vendor reviews", "show me the last 4 incidents".</li>
+    <li><strong>Site visits</strong> — Mumbai HQ (full), Noida (sampled).</li>
+    <li><strong>Closing meeting</strong> — verbal findings, draft NC list.</li>
+    <li><strong>Report</strong> — within 2-4 weeks, certification recommendation.</li>
+  </ol>
+
+  <h4>Surveillance &amp; Recertification — what happens in Year 2 &amp; 3</h4>
+  <ul>
+    <li><strong>Year 2 — Surveillance Audit:</strong> Smaller (2-4 days), samples key controls, verifies CAPA from Year 1, checks change.</li>
+    <li><strong>Year 3 — Surveillance Audit:</strong> Same as Year 2.</li>
+    <li><strong>Year 3 (end) — Recertification Audit:</strong> Full re-audit. New certificate for next 3 years.</li>
+  </ul>
+</div>
+
+<!-- ============================================ -->
+<!-- PART 6 — INTEGRATED MS -->
+<!-- ============================================ -->
+<div class="part-banner">
+  <span class="num">PART 6</span>
+  <h2>The Integrated Management System</h2>
+</div>
+
+<div class="card">
+  <h3>Four ISO standards, one system</h3>
+  <p>Network18 wants four certifications integrated:</p>
+
+  <div class="four-col">
+    <div class="control-card org" style="text-align:center;">
+      <h5>ISO 27001:2022</h5>
+      <p style="font-size:20px;font-weight:800;color:var(--blue);margin:6px 0;">Information<br>Security</p>
+      <p>Protect data &amp; systems</p>
+    </div>
+    <div class="control-card people" style="text-align:center;">
+      <h5>ISO 9001:2015</h5>
+      <p style="font-size:20px;font-weight:800;color:var(--green);margin:6px 0;">Quality</p>
+      <p>Consistent service quality</p>
+    </div>
+    <div class="control-card physical" style="text-align:center;">
+      <h5>ISO 14001:2015</h5>
+      <p style="font-size:20px;font-weight:800;color:var(--amber);margin:6px 0;">Environment</p>
+      <p>Manage environmental impact</p>
+    </div>
+    <div class="control-card tech" style="text-align:center;">
+      <h5>ISO 45001:2018</h5>
+      <p style="font-size:20px;font-weight:800;color:var(--purple);margin:6px 0;">OH&amp;S</p>
+      <p>Worker safety</p>
+    </div>
+  </div>
+
+  <h4>Why integration works — the Annex SL "High-Level Structure"</h4>
+  <p>All modern ISO management system standards share the same 10-clause structure. So Clauses 4-10 of each standard ask <em>the same fundamental questions</em>:</p>
+
+  <table class="simple">
+    <tr><th>Clause</th><th>Question</th><th>Common answer across all 4</th></tr>
+    <tr><td>4. Context</td><td>What is the organization, who cares, what's in scope?</td><td>Same scope statement for all 4 (Network18 + 2 locations)</td></tr>
+    <tr><td>5. Leadership</td><td>Is top management committed?</td><td>One integrated policy signed by CEO</td></tr>
+    <tr><td>6. Planning</td><td>What are the risks, objectives, plans?</td><td>One integrated risk register tagged by domain</td></tr>
+    <tr><td>7. Support</td><td>Resources, competence, documents?</td><td>One document management system, one training programme</td></tr>
+    <tr><td>8. Operation</td><td>How do we run it?</td><td>Standard-specific operations (controls, processes)</td></tr>
+    <tr><td>9. Performance</td><td>Is it working?</td><td>One internal audit plan, one management review</td></tr>
+    <tr><td>10. Improvement</td><td>How do we get better?</td><td>One CAPA process</td></tr>
+  </table>
+</div>
+
+<!-- INTEGRATED MS SVG -->
+<div class="figure">
+  <svg viewBox="0 0 850 380" xmlns="http://www.w3.org/2000/svg">
+    <text x="425" y="26" text-anchor="middle" font-family="Helvetica" font-size="18" font-weight="700" fill="#1A1A1A">Four Standards, One Integrated Management System</text>
+
+    <!-- Common HLS in middle -->
+    <rect x="280" y="120" width="290" height="220" rx="12" fill="#1A1A1A"/>
+    <text x="425" y="148" text-anchor="middle" font-family="Helvetica" font-size="14" font-weight="700" fill="#FFB600">SHARED CORE</text>
+    <text x="425" y="166" text-anchor="middle" font-family="Helvetica" font-size="10" fill="#fff">(Clauses 4-10 / Annex SL)</text>
+    <line x1="300" y1="178" x2="550" y2="178" stroke="#FFB600" opacity="0.4"/>
+    <text x="425" y="200" text-anchor="middle" font-family="Helvetica" font-size="11" fill="#fff">Context · Leadership</text>
+    <text x="425" y="218" text-anchor="middle" font-family="Helvetica" font-size="11" fill="#fff">Planning · Support</text>
+    <text x="425" y="236" text-anchor="middle" font-family="Helvetica" font-size="11" fill="#fff">Operation · Performance</text>
+    <text x="425" y="254" text-anchor="middle" font-family="Helvetica" font-size="11" fill="#fff">Improvement</text>
+    <line x1="300" y1="266" x2="550" y2="266" stroke="#FFB600" opacity="0.4"/>
+    <text x="425" y="285" text-anchor="middle" font-family="Helvetica" font-size="10" fill="#CFEED2">One policy · One risk register</text>
+    <text x="425" y="300" text-anchor="middle" font-family="Helvetica" font-size="10" fill="#CFEED2">One audit · One review</text>
+    <text x="425" y="318" text-anchor="middle" font-family="Helvetica" font-size="10" fill="#CFEED2">One CAPA</text>
+
+    <!-- 4 corner standards -->
+    <rect x="30" y="80" width="180" height="80" rx="10" fill="#2980B9"/>
+    <text x="120" y="108" text-anchor="middle" font-family="Helvetica" font-size="13" font-weight="700" fill="#fff">ISO 27001:2022</text>
+    <text x="120" y="128" text-anchor="middle" font-family="Helvetica" font-size="11" fill="#fff">Information Security</text>
+    <text x="120" y="146" text-anchor="middle" font-family="Helvetica" font-size="10" fill="#E8F3FB">93 controls (Annex A)</text>
+
+    <rect x="640" y="80" width="180" height="80" rx="10" fill="#27AE60"/>
+    <text x="730" y="108" text-anchor="middle" font-family="Helvetica" font-size="13" font-weight="700" fill="#fff">ISO 9001:2015</text>
+    <text x="730" y="128" text-anchor="middle" font-family="Helvetica" font-size="11" fill="#fff">Quality Management</text>
+    <text x="730" y="146" text-anchor="middle" font-family="Helvetica" font-size="10" fill="#E8F5E9">Process consistency</text>
+
+    <rect x="30" y="270" width="180" height="80" rx="10" fill="#E67E22"/>
+    <text x="120" y="298" text-anchor="middle" font-family="Helvetica" font-size="13" font-weight="700" fill="#fff">ISO 14001:2015</text>
+    <text x="120" y="318" text-anchor="middle" font-family="Helvetica" font-size="11" fill="#fff">Environmental Mgmt</text>
+    <text x="120" y="336" text-anchor="middle" font-family="Helvetica" font-size="10" fill="#FFF6E6">Aspects &amp; impacts</text>
+
+    <rect x="640" y="270" width="180" height="80" rx="10" fill="#6F2DA8"/>
+    <text x="730" y="298" text-anchor="middle" font-family="Helvetica" font-size="13" font-weight="700" fill="#fff">ISO 45001:2018</text>
+    <text x="730" y="318" text-anchor="middle" font-family="Helvetica" font-size="11" fill="#fff">OH&amp;S Management</text>
+    <text x="730" y="336" text-anchor="middle" font-family="Helvetica" font-size="10" fill="#F8F4FF">Worker safety</text>
+
+    <!-- Lines connecting to core -->
+    <line x1="210" y1="120" x2="280" y2="170" stroke="#555" stroke-width="2"/>
+    <line x1="640" y1="120" x2="570" y2="170" stroke="#555" stroke-width="2"/>
+    <line x1="210" y1="310" x2="280" y2="290" stroke="#555" stroke-width="2"/>
+    <line x1="640" y1="310" x2="570" y2="290" stroke="#555" stroke-width="2"/>
+  </svg>
+  <div class="figure-caption">Each standard keeps its own subject-specific requirements but shares the core management system.</div>
+</div>
+
+<div class="card">
+  <h4>What each standard adds (the unique 30%)</h4>
+  <table class="simple">
+    <tr><th>Standard</th><th>What's unique</th><th>Network18 example</th></tr>
+    <tr><td>27001</td><td>Annex A — 93 information security controls + SoA</td><td>Encryption of subscriber PII; access reviews</td></tr>
+    <tr><td>9001</td><td>Customer focus, process approach, product/service quality</td><td>Editorial quality standards; subscriber service SLAs</td></tr>
+    <tr><td>14001</td><td>Environmental aspects, impacts, legal compliance (e.g., e-waste, energy use)</td><td>Server room energy efficiency; e-waste from 4,800 endpoints</td></tr>
+    <tr><td>45001</td><td>Hazard identification, worker consultation, incident reporting</td><td>Journalists in conflict zones; broadcast studio safety; ergonomics</td></tr>
+  </table>
+
+  <h4>Benefits of integration — what to tell Network18 leadership</h4>
+  <ul>
+    <li><strong>Audit cost reduction:</strong> 30-40% lower than four separate audits</li>
+    <li><strong>Single management review</strong> instead of four</li>
+    <li><strong>One internal audit programme</strong> with cross-trained auditors</li>
+    <li><strong>One document management system</strong>, consistent versioning</li>
+    <li><strong>Cultural coherence:</strong> "quality + security + safety + environment" as one identity</li>
+    <li><strong>Easier maintenance:</strong> one update to context affects all four</li>
+  </ul>
+
+  <div class="mini">
+    <span class="badge">Mini Scenario</span>
+    <h4>The "we'll integrate later" trap</h4>
+    <p>A manufacturer pursued ISO 9001 in 2018 (built one system), ISO 14001 in 2020 (built another), ISO 45001 in 2022 (third), and finally ISO 27001 in 2024 (fourth).</p>
+    <p>They ended up with 4 separate policy frameworks, 4 risk registers, 4 internal audit teams (with overlapping skill needs), 4 management reviews per year. Total maintenance cost: ~₹2.8 Cr/year.</p>
+    <p>Integration in Year 5 took 18 months and cost ~₹1.5 Cr because they had to rewrite, retrain, and migrate.</p>
+    <p class="lesson"><strong>Lesson:</strong> Build it integrated from day one. Network18 has the chance to do this right. We bring the architecture.</p>
+  </div>
+</div>
+
+<!-- ============================================ -->
+<!-- PART 7 — TPRM DEEP DIVE -->
+<!-- ============================================ -->
+<div class="part-banner">
+  <span class="num">PART 7</span>
+  <h2>TPRM — Third-Party Risk Management Deep Dive</h2>
+</div>
+
+<div class="card">
+  <h3>Why TPRM matters at Network18</h3>
+  <p>Vendors are now the #1 vector for major breaches. Network18 has ~340 vendors. Any one of them could be the breach Network18 reads about on the front page.</p>
+
+  <div class="memory">
+    <span class="badge">Anchor 9</span>
+    <h4>"5 Os" — TPRM lifecycle</h4>
+    <p><strong>Origin · Onboard · Operate · Oversee · Offboard.</strong> Five stages. Skip one and the program leaks.</p>
+  </div>
+</div>
+
+<!-- TPRM LIFECYCLE DETAILED -->
+<div class="card">
+  <h3>The 5-Stage TPRM Lifecycle — what we do at each stage</h3>
+
+  <h4>Stage 1 — Origin (Tiering)</h4>
+  <p>Classify every vendor before any work begins. Tiering criteria for Network18:</p>
+
+  <table class="simple">
+    <tr><th>Criteria</th><th>Tier 1 (Critical)</th><th>Tier 2 (Significant)</th><th>Tier 3 (Standard)</th></tr>
+    <tr><td>Data sensitivity</td><td>Holds Restricted PII / financial / pre-pub content</td><td>Holds Confidential data</td><td>Public/internal only</td></tr>
+    <tr><td>Service criticality</td><td>If vendor fails, primary business stops in &lt;24h</td><td>Disrupts operations 1-7 days</td><td>Disruption minor or replaceable</td></tr>
+    <tr><td>Network access</td><td>Network access OR API access OR remote admin</td><td>Read-only access</td><td>No direct access</td></tr>
+    <tr><td>Volume of data/transactions</td><td>&gt;100k records or &gt;₹10 Cr/year value</td><td>10k-100k records or ₹1-10 Cr</td><td>&lt;10k records</td></tr>
+    <tr><td>Regulatory scope</td><td>Touches data under DPDPA, SEBI, IT Rules</td><td>Touches employee/operational data</td><td>None</td></tr>
+  </table>
+
+  <div class="net18">
+    <strong>Tier 1 vendors at Network18 (indicative 22)</strong>
+    <ul>
+      <li>AWS, Azure, Google Cloud (infrastructure)</li>
+      <li>Akamai (CDN), Cloudflare (security)</li>
+      <li>Adobe Experience Manager (CMS), Brightcove (video)</li>
+      <li>Major ad-tech (Google, The Trade Desk, etc.)</li>
+      <li>Subscription billing platform</li>
+      <li>SuccessFactors (HR), Salesforce (CRM)</li>
+      <li>Broadcast playout vendor</li>
+      <li>Microsoft 365, Okta</li>
+      <li>Primary co-location data centre</li>
+      <li>News wire services (Reuters, ANI, PTI)</li>
+      <li>Subscription/identity providers</li>
+    </ul>
+  </div>
+
+  <h4>Stage 2 — Onboard (Due Diligence Before Signing)</h4>
+  <p>Risk-tiered DD. Don't waste effort on Tier 3. Don't go light on Tier 1.</p>
+
+  <table class="simple">
+    <tr><th>Tier</th><th>Onboarding DD activities</th><th>Cycle time</th></tr>
+    <tr><td>Tier 1</td><td>(1) Detailed security questionnaire (200+ Qs) (2) Review SOC 2 / ISO 27001 cert &amp; scope (3) Pen test report review (4) On-site or remote deep-dive (5) Contract clauses: security, audit rights, breach notification, indemnity (6) Architecture review</td><td>4-8 weeks</td></tr>
+    <tr><td>Tier 2</td><td>(1) Standard questionnaire (80 Qs) (2) Review SOC 2 / ISO if available (3) Contract clauses</td><td>2-3 weeks</td></tr>
+    <tr><td>Tier 3</td><td>(1) Light questionnaire (20 Qs) (2) Standard contract</td><td>3-5 days</td></tr>
+  </table>
+
+  <h4>Stage 3 — Operate (Ongoing Monitoring)</h4>
+  <ul>
+    <li><strong>Tier 1:</strong> Annual full reassessment + continuous monitoring (breach feeds, security ratings like BitSight/SecurityScorecard)</li>
+    <li><strong>Tier 2:</strong> Annual questionnaire + sample evidence + breach feeds</li>
+    <li><strong>Tier 3:</strong> Self-attestation every 2 years</li>
+  </ul>
+
+  <h4>Stage 4 — Oversee (When Issues Arise)</h4>
+  <p>What happens when a vendor has an incident, fails a control, or changes ownership:</p>
+  <ul>
+    <li>Vendor incident notification (24h for Tier 1 per contract)</li>
+    <li>Risk re-assessment triggered</li>
+    <li>Remediation plan from vendor</li>
+    <li>Decision: continue, escalate, terminate</li>
+    <li>Concentration risk check — if multiple Tier-1 services from same vendor, scale matters more</li>
+  </ul>
+
+  <h4>Stage 5 — Offboard (When Engagement Ends)</h4>
+  <p>The most-skipped stage. A vendor without offboarding is a former vendor with current access.</p>
+  <ul>
+    <li>Access revocation checklist (Active Directory, SaaS apps, VPN, API keys, badges)</li>
+    <li>Data return or certified destruction</li>
+    <li>Contract close-out</li>
+    <li>Update vendor inventory</li>
+  </ul>
+</div>
+
+<!-- TPRM TIERING DECISION TREE -->
+<div class="figure">
+  <svg viewBox="0 0 900 460" xmlns="http://www.w3.org/2000/svg">
+    <text x="450" y="26" text-anchor="middle" font-family="Helvetica" font-size="17" font-weight="700" fill="#1A1A1A">TPRM Tiering Decision Tree</text>
+
+    <!-- Start -->
+    <rect x="370" y="60" width="160" height="50" rx="25" fill="#1A1A1A"/>
+    <text x="450" y="92" text-anchor="middle" font-family="Helvetica" font-size="13" font-weight="700" fill="#FFB600">New Vendor</text>
+
+    <line x1="450" y1="110" x2="450" y2="140" stroke="#555" stroke-width="2"/>
+
+    <!-- Q1 -->
+    <rect x="320" y="140" width="260" height="50" rx="6" fill="#fff" stroke="#1A1A1A" stroke-width="2"/>
+    <text x="450" y="172" text-anchor="middle" font-family="Helvetica" font-size="12" font-weight="600" fill="#1A1A1A">Will they handle Restricted data?</text>
+
+    <line x1="320" y1="165" x2="200" y2="200" stroke="#27AE60" stroke-width="2"/>
+    <line x1="580" y1="165" x2="700" y2="200" stroke="#C0392B" stroke-width="2"/>
+    <text x="245" y="190" font-family="Helvetica" font-size="11" font-weight="700" fill="#27AE60">YES</text>
+    <text x="635" y="190" font-family="Helvetica" font-size="11" font-weight="700" fill="#C0392B">NO</text>
+
+    <!-- Branch YES (Tier 1 candidate) -->
+    <rect x="100" y="200" width="200" height="44" rx="6" fill="#C0392B"/>
+    <text x="200" y="227" text-anchor="middle" font-family="Helvetica" font-size="12" font-weight="700" fill="#fff">→ TIER 1 (Critical)</text>
+
+    <line x1="200" y1="244" x2="200" y2="275" stroke="#555" stroke-width="2"/>
+    <rect x="40" y="275" width="320" height="60" rx="6" fill="#FDECEA"/>
+    <text x="200" y="298" text-anchor="middle" font-family="Helvetica" font-size="11" fill="#8B1A0E">Full DD: 200-Q questionnaire, SOC 2 review,</text>
+    <text x="200" y="314" text-anchor="middle" font-family="Helvetica" font-size="11" fill="#8B1A0E">on-site, contract clauses, annual reassessment,</text>
+    <text x="200" y="328" text-anchor="middle" font-family="Helvetica" font-size="11" fill="#8B1A0E">continuous monitoring</text>
+
+    <!-- Branch NO leads to next question -->
+    <rect x="600" y="200" width="200" height="44" rx="6" fill="#fff" stroke="#1A1A1A" stroke-width="2"/>
+    <text x="700" y="220" text-anchor="middle" font-family="Helvetica" font-size="11" font-weight="600" fill="#1A1A1A">Critical service or</text>
+    <text x="700" y="236" text-anchor="middle" font-family="Helvetica" font-size="11" font-weight="600" fill="#1A1A1A">network access?</text>
+
+    <line x1="635" y1="247" x2="560" y2="285" stroke="#E67E22" stroke-width="2"/>
+    <line x1="765" y1="247" x2="830" y2="285" stroke="#888" stroke-width="2"/>
+    <text x="585" y="270" font-family="Helvetica" font-size="11" font-weight="700" fill="#E67E22">YES</text>
+    <text x="805" y="270" font-family="Helvetica" font-size="11" font-weight="700" fill="#888">NO</text>
+
+    <rect x="450" y="285" width="200" height="44" rx="6" fill="#E67E22"/>
+    <text x="550" y="312" text-anchor="middle" font-family="Helvetica" font-size="12" font-weight="700" fill="#fff">→ TIER 2 (Significant)</text>
+
+    <line x1="550" y1="329" x2="550" y2="360" stroke="#555" stroke-width="2"/>
+    <rect x="430" y="360" width="240" height="40" rx="6" fill="#FFF6E6"/>
+    <text x="550" y="385" text-anchor="middle" font-family="Helvetica" font-size="11" fill="#8C4500">80-Q questionnaire, annual review</text>
+
+    <rect x="720" y="285" width="160" height="44" rx="6" fill="#27AE60"/>
+    <text x="800" y="312" text-anchor="middle" font-family="Helvetica" font-size="12" font-weight="700" fill="#fff">→ TIER 3 (Standard)</text>
+
+    <line x1="800" y1="329" x2="800" y2="360" stroke="#555" stroke-width="2"/>
+    <rect x="710" y="360" width="180" height="40" rx="6" fill="#E8F5E9"/>
+    <text x="800" y="385" text-anchor="middle" font-family="Helvetica" font-size="11" fill="#1B5E20">Light questionnaire, 2-yr cycle</text>
+
+    <!-- Bottom strip -->
+    <rect x="40" y="420" width="820" height="30" rx="6" fill="#F8F4FF" stroke="#6F2DA8"/>
+    <text x="450" y="440" text-anchor="middle" font-family="Helvetica" font-size="12" font-weight="700" fill="#4A1F73">Concentration test: would N18 reclassify upward if this vendor sits alongside 4 others doing same thing?</text>
+  </svg>
+  <div class="figure-caption">A simple decision tree. Run every vendor through it. Document the answer.</div>
+</div>
+
+<div class="card">
+  <h3>The 5 External TPRM Assessments — what we actually do</h3>
+  <p>Five per year. These are deep, on-site (or deep remote) assessments of selected Tier-1 vendors. The output: a full report with risk rating, control findings, remediation roadmap, contractual requests.</p>
+
+  <h4>Indicative selection for Year 1</h4>
+  <table class="simple">
+    <tr><th>#</th><th>Vendor type</th><th>Why selected</th><th>Effort</th></tr>
+    <tr><td>1</td><td>Primary cloud (AWS or GCP)</td><td>Concentration risk; shared responsibility nuances; sets standard</td><td>4 weeks</td></tr>
+    <tr><td>2</td><td>Primary ad-tech / programmatic partner</td><td>Volume of user data; DPDPA exposure</td><td>3 weeks</td></tr>
+    <tr><td>3</td><td>Critical SaaS (e.g., subscription/identity provider)</td><td>Subscriber PII + revenue criticality</td><td>3 weeks</td></tr>
+    <tr><td>4</td><td>CDN / video delivery partner</td><td>Availability + DDoS exposure</td><td>3 weeks</td></tr>
+    <tr><td>5</td><td>Emerging risk (e.g., GenAI vendor used by editorial)</td><td>New tech, untested governance</td><td>3 weeks</td></tr>
+  </table>
+
+  <h4>Assessment methodology (per vendor)</h4>
+  <ol>
+    <li><strong>Pre-engagement:</strong> Confirm scope, NDA, kick-off with Network18 + vendor</li>
+    <li><strong>Document review:</strong> SOC 2, ISO certs, pen test reports, policies, architecture diagrams, contract</li>
+    <li><strong>Workshops:</strong> 5-8 sessions with vendor security, IT, ops, legal, BCP teams</li>
+    <li><strong>Sample testing:</strong> Access reviews, change management, incident records, vulnerability scans</li>
+    <li><strong>Physical/virtual walkthrough:</strong> Data centre or cloud control review</li>
+    <li><strong>Report:</strong> Findings, residual risk rating, prioritized recommendations</li>
+    <li><strong>Closing:</strong> Read-out with Network18 + vendor; agree remediation tracker</li>
+  </ol>
+
+  <h4>What the assessment report typically contains</h4>
+  <ul>
+    <li>Executive summary (1 page) — verdict, top 3 risks, recommended action</li>
+    <li>Vendor profile &amp; scope of services</li>
+    <li>Maturity assessment across ~15 domains (governance, IAM, network, data, cloud, vuln mgmt, incident, BCP, etc.)</li>
+    <li>Findings register (typically 20-40 findings)</li>
+    <li>Risk heatmap</li>
+    <li>Contractual recommendations (clauses to add or change)</li>
+    <li>Remediation plan with owners &amp; dates</li>
+    <li>Next-assessment trigger criteria</li>
+  </ul>
+
+  <div class="mini">
+    <span class="badge">Mini Scenario</span>
+    <h4>The cloud shared-responsibility surprise</h4>
+    <p>A retailer ran a TPRM assessment on AWS, treating it as a normal vendor review. The lead consultant asked AWS for evidence of "patching of operating systems in our environment." AWS replied: "That's your responsibility, not ours, under the shared responsibility model."</p>
+    <p>The retailer realized: a hundred controls they assumed AWS handled were actually <em>theirs</em>. They had no evidence those controls were operating. Six weeks of re-scoping followed.</p>
+    <p class="lesson"><strong>Lesson:</strong> When assessing cloud vendors, map the shared responsibility model first. Then ask each side for evidence of <em>their</em> half. Don't assume.</p>
+  </div>
+</div>
+
+<!-- ============================================ -->
+<!-- PART 8 — COMMON FINDINGS & EVIDENCE -->
+<!-- ============================================ -->
+<div class="part-banner">
+  <span class="num">PART 8</span>
+  <h2>Common Audit Findings &amp; How to Survive Them</h2>
+</div>
+
+<div class="card">
+  <h3>The Top 20 ISO 27001 Audit Findings — and how to prevent them</h3>
+  <p>These are the findings external auditors raise most often. Walk through this list at Month 6 for Network18 — every finding here, ask "do we have this?" If no, fix before Stage 1.</p>
+
+  <table class="simple">
+    <tr><th>#</th><th>Finding</th><th>How to prevent</th></tr>
+    <tr><td>1</td><td>SoA not aligned to current operations</td><td>Update SoA whenever scope changes; review quarterly</td></tr>
+    <tr><td>2</td><td>Risk treatment plans missing for several risks</td><td>Treatment is mandatory for every risk identified</td></tr>
+    <tr><td>3</td><td>Risks accepted without documented sign-off</td><td>Risk acceptances need authority, expiry, review date</td></tr>
+    <tr><td>4</td><td>Asset inventory incomplete</td><td>Reconcile CMDB to risk register quarterly</td></tr>
+    <tr><td>5</td><td>Information classification not applied consistently</td><td>Mandate classification at creation; spot-check</td></tr>
+    <tr><td>6</td><td>Access reviews not conducted at stated cadence</td><td>Automate where possible (Okta/SailPoint); track completion</td></tr>
+    <tr><td>7</td><td>Privileged accounts without MFA</td><td>Inventory PAs; force MFA; deny exceptions without compensating</td></tr>
+    <tr><td>8</td><td>Vendor security clauses missing from older contracts</td><td>Programme to update top vendors first; standard clause library</td></tr>
+    <tr><td>9</td><td>BCP not tested in the last 12 months</td><td>Annual mandatory test; document scenarios &amp; lessons</td></tr>
+    <tr><td>10</td><td>Training completion below target</td><td>Track per-person completion; escalate non-completion to managers</td></tr>
+    <tr><td>11</td><td>Incidents lack root-cause analysis</td><td>Every major incident gets RCA + lessons + control changes</td></tr>
+    <tr><td>12</td><td>Management review minutes too thin</td><td>Use a standard agenda template covering all 6 required inputs</td></tr>
+    <tr><td>13</td><td>Internal audit programme doesn't cover everything</td><td>Plan covers full scope within audit cycle (3 yrs typical)</td></tr>
+    <tr><td>14</td><td>Non-conformities not closed within target</td><td>CAPA tracker with aging dashboards</td></tr>
+    <tr><td>15</td><td>Cryptographic key management not documented</td><td>Key management standard with lifecycle: gen, dist, rot, retire</td></tr>
+    <tr><td>16</td><td>Logs not monitored / monitoring not evidenced</td><td>SIEM use cases reviewed quarterly; monitoring SOPs documented</td></tr>
+    <tr><td>17</td><td>Removable media controls weak or missing</td><td>USB block by default; exception process</td></tr>
+    <tr><td>18</td><td>Information deletion not consistently performed</td><td>Retention schedule + deletion records (DPDPA driver)</td></tr>
+    <tr><td>19</td><td>Configuration baselines not enforced or drifted</td><td>CIS baselines + drift detection (CSPM, config mgmt tools)</td></tr>
+    <tr><td>20</td><td>Awareness training too generic, no role-based variation</td><td>Tailored modules for admins, developers, journalists, finance</td></tr>
+  </table>
+</div>
+
+<div class="card">
+  <h3>Evidence — what auditors will ask for</h3>
+  <p>Auditors don't accept verbal answers. They want artifacts. For every "Yes" in the SoA, you need evidence that the control is operating.</p>
+
+  <h4>The 6 evidence types</h4>
+  <ol>
+    <li><strong>Policy or procedure document</strong> (proves it's defined)</li>
+    <li><strong>System configuration screenshot</strong> (proves it's technically enforced)</li>
+    <li><strong>Operational record</strong> — log, ticket, completed checklist (proves it runs)</li>
+    <li><strong>Approval / sign-off</strong> (proves authority chain)</li>
+    <li><strong>Training record / attestation</strong> (proves competence)</li>
+    <li><strong>Test result</strong> — internal audit, scan, BCP test (proves it works)</li>
+  </ol>
+
+  <div class="memory">
+    <span class="badge">Anchor 10</span>
+    <h4>Strong evidence = 3 of the 6</h4>
+    <p>Weak evidence is one document. Strong evidence is 3+ types covering define / configure / operate. Walking into the audit, every Tier-1 control should have all 3.</p>
+  </div>
+
+  <h4>Evidence quality test — apply to every artifact</h4>
+  <table class="simple">
+    <tr><th>Test</th><th>Question</th></tr>
+    <tr><td>Provenance</td><td>Who created this, when, in what system?</td></tr>
+    <tr><td>Completeness</td><td>Is this all of it, or curated?</td></tr>
+    <tr><td>Integrity</td><td>Could it have been altered? Is it timestamped?</td></tr>
+    <tr><td>Timeliness</td><td>Was it captured when it happened, or retrofitted?</td></tr>
+    <tr><td>Linkage</td><td>Does it map cleanly to the specific control assertion?</td></tr>
+  </table>
+
+  <div class="warn">
+    <strong>The cardinal sin:</strong> Retrofitting evidence. Generating 12 months of "quarterly access reviews" the week before the audit is fraud — and good auditors spot it instantly (timestamps, file metadata, identical formatting). Better to admit a gap than fake the evidence.
+  </div>
+</div>
+
+<!-- ============================================ -->
+<!-- PART 9 — Q&A BANK -->
+<!-- ============================================ -->
+<div class="part-banner">
+  <span class="num">PART 9</span>
+  <h2>The Q&amp;A Bank — Questions You Will Be Asked</h2>
+</div>
+
+<div class="card">
+  <h3>What Network18 CISO / CIO will ask in week 1</h3>
+
+  <div class="qa">
+    <div class="q">Q1: "Walk me through your approach in two minutes."</div>
+    <div class="a"><strong>A:</strong> "We run a 4-phase approach across 12 months. Months 1-2 is a gap assessment — we'll do a structured review against ISO 27001:2022, ISO 9001/14001/45001, and your TPRM program at both Mumbai and Noida. Months 3-6 we build and remediate — integrated policy framework, risk register, SoA, and we close the priority gaps. Months 7-9 we run an internal audit and management review. Months 10-11 is the external Certification Body audit — Stage 1 then Stage 2. By month 12 you're certified across all four standards, with a TPRM program operating on 340 vendors and 5 deep external assessments done. We've built this on PDCA — the cycle every ISO standard uses."</div>
+  </div>
+
+  <div class="qa">
+    <div class="q">Q2: "Why integrate the four standards? Sounds complicated."</div>
+    <div class="a"><strong>A:</strong> "Because they share 70% of their structure — same Annex SL clauses 4-10. If you run them separately, you maintain four policies, four risk registers, four audit programmes, four management reviews. Integration saves you 30-40% on audit costs alone and avoids inconsistency. The unique part of each standard — Annex A controls for 27001, customer focus for 9001, environmental aspects for 14001, hazard ID for 45001 — sits on top of a shared core. Best time to integrate is at the start; we're at that moment."</div>
+  </div>
+
+  <div class="qa">
+    <div class="q">Q3: "What's changed in ISO 27001:2022 vs 2013? We're on the old one."</div>
+    <div class="a"><strong>A:</strong> "Three things to know. First, Annex A was restructured from 114 controls to 93, in 4 themes — Organizational, People, Physical, Technological. Second, 11 new controls were added — most importantly threat intelligence, cloud security, ICT readiness for BCM, data masking, information deletion, secure coding. Third, the clauses 4-10 are largely unchanged. If you were certified on 2013, you have to transition by 31 October 2025 — we're past that, so 2022 is the only option."</div>
+  </div>
+
+  <div class="qa">
+    <div class="q">Q4: "How does TPRM scale to 340 vendors?"</div>
+    <div class="a"><strong>A:</strong> "Risk-based tiering. We classify by data sensitivity, service criticality, network access, volume, and regulatory scope. Tier 1 — about 22 vendors — get full annual assessments and continuous monitoring. Tier 2 — 78 — get annual questionnaires plus sample evidence. Tier 3 — 240 — light-touch every 2 years. 80% of your risk sits in the top 22; 80% of your effort goes there. The 5 external deep assessments rotate across Tier 1 — typically cloud, ad-tech, CDN, critical SaaS, and one emerging-risk vendor."</div>
+  </div>
+
+  <div class="qa">
+    <div class="q">Q5: "We use SOC 2 reports for most vendors. Isn't that enough?"</div>
+    <div class="a"><strong>A:</strong> "SOC 2 is excellent when it covers the right scope. But the report's value is in what's <em>inside</em> the boundary — and most teams never check. We've seen a vendor's SOC 2 cover their HR systems while we were using their data analytics platform. Real assurance comes from: read the scope statement on page 3, map it to the service you actually buy, then test for gaps. We do this as part of every Tier-1 onboarding."</div>
+  </div>
+
+  <div class="qa">
+    <div class="q">Q6: "What's the biggest risk to our certification?"</div>
+    <div class="a"><strong>A:</strong> "Honestly, three patterns kill more certifications than anything else. First, the SoA — if it's stale or not aligned to operations, every audit conversation gets harder. Second, evidence discipline — having controls without artifacts is the same as not having them. Third, the management review meeting — if minutes are thin, the auditor concludes leadership isn't engaged. We invest heavily in those three from week 1."</div>
+  </div>
+
+  <div class="qa">
+    <div class="q">Q7: "We're a media company. We have journalist sources to protect. How does ISO 27001 cover that?"</div>
+    <div class="a"><strong>A:</strong> "Great question — it's specific to your sector. A.5.34 (privacy &amp; PII protection) and A.8.11 (data masking) directly apply. Source protection becomes a Restricted information classification: encrypted communications, MFA-protected mailboxes, source identity stored separately from content, retention &amp; deletion controls. We'll write a Source Protection sub-policy aligned to the ISMS and to your editorial guidelines. The integration with DPDPA 2023 also matters here."</div>
+  </div>
+
+  <div class="qa">
+    <div class="q">Q8: "Will this slow down our editorial / business velocity?"</div>
+    <div class="a"><strong>A:</strong> "Designed not to. The structural changes — policy framework, risk register, SoA, TPRM workflow — happen in parallel to operations, owned by your security and IT teams with our coaching. The places where there will be friction are at vendor onboarding for new Tier-1 and at access provisioning — but those should be slow on purpose. Editorial workflows we don't touch unless the gap report finds something specific."</div>
+  </div>
+
+  <div class="qa">
+    <div class="q">Q9: "How does this work with DPDPA 2023?"</div>
+    <div class="a"><strong>A:</strong> "DPDPA and ISO 27001 reinforce each other. ISO 27001 gives you the management system to operationalize DPDPA — consent management, retention &amp; deletion, breach notification, data principal rights, DPIA. A.5.34, A.8.10 (information deletion) and A.8.11 (data masking) align directly. Our gap assessment will produce a DPDPA-mapped view: where the ISMS already covers DPDPA, where extra controls are needed."</div>
+  </div>
+
+  <div class="qa">
+    <div class="q">Q10: "What's our role vs PwC's role?"</div>
+    <div class="a"><strong>A:</strong> "We are advisors, builders, and trusted partners — but you own the ISMS. We can write policies, design the risk register, run the assessment, prepare you for the audit, coach your team. We cannot operate your controls or sign your management review. The CB auditor will want to see your CISO and ISMS owner speaking, not us. That's why we embed knowledge transfer from day one."</div>
+  </div>
+
+  <div class="qa">
+    <div class="q">Q11: "Who's the auditor going to be? Can you recommend?"</div>
+    <div class="a"><strong>A:</strong> "Independent Certification Bodies — BSI, DNV, Bureau Veritas, TUV, Intertek, LRQA, BVQI are the major ones in India. PwC is independent of all of them. We don't recommend a specific CB; we provide a comparison matrix on price, scope flexibility, sector experience (media), and auditor availability. You select. We then work with whomever you choose."</div>
+  </div>
+
+  <div class="qa">
+    <div class="q">Q12: "How much would Stage 1 + Stage 2 audit cost separately?"</div>
+    <div class="a"><strong>A:</strong> "CB audit fees are independent of PwC fees — paid directly to the CB. For a Network18-sized integrated certification across all 4 standards, 2 locations, expect roughly ₹18-30 lakh for Stage 1 + Stage 2 combined, plus surveillance audits at ₹10-15 lakh per year. Integration savings come from one visit covering all four standards. We'll help you negotiate."</div>
+  </div>
+
+  <div class="qa">
+    <div class="q">Q13: "What if we fail the Stage 2 audit?"</div>
+    <div class="a"><strong>A:</strong> "Failure is rare if we've done the work — that's the point of internal audit in Phase 3. If there's a Major NC, you get 90 days to remediate; auditor returns to verify; if closed, you're certified. The Year 1 cost includes our support through any remediation. We aim for zero Major NCs at Stage 2."</div>
+  </div>
+
+  <div class="qa">
+    <div class="q">Q14: "How will we know it's working between audits?"</div>
+    <div class="a"><strong>A:</strong> "Quarterly management reviews, monthly ISMS metrics dashboard, ongoing risk register reviews, and the KRI dashboard for the top risks. We provide the templates and run the first two cycles with you, then it's yours. Also: we deliver an annual cyber/GRC posture report to your board that summarizes ISO certification status, TPRM cycle, and emerging risks."</div>
+  </div>
+
+  <div class="qa">
+    <div class="q">Q15: "How is this different from what the previous firm did?"</div>
+    <div class="a"><strong>A:</strong> [Don't bash the predecessor.] "I won't speak to what they did — we're building forward. The integration of all four ISO standards is the architectural difference. The TPRM tiering &amp; concentration analysis is the second. The link to Workstreams 1 and 2 — pulling SOC telemetry as evidence, feeding pentest findings into the risk register — is the third. The compound effect is a GRC system that's audit-defensible and actually drives the business."</div>
+  </div>
+</div>
+
+<!-- ============================================ -->
+<!-- PART 10 — CHEAT SHEETS -->
+<!-- ============================================ -->
+<div class="part-banner">
+  <span class="num">PART 10</span>
+  <h2>Cheat Sheets &amp; Mental Anchors</h2>
+</div>
+
+<div class="cheat">
+  <h3>The 10 Anchors (memorize these)</h3>
+  <ul>
+    <li><strong>1. Trinity:</strong> Say · Do · Prove</li>
+    <li><strong>2. PDCA:</strong> Plan · Do · Check · Act = Q1 · Q2 · Q3 · Q4</li>
+    <li><strong>3. 4-10 + 93/4:</strong> Clauses 4-10 + 93 controls in 4 themes</li>
+    <li><strong>4. OPPT:</strong> Org 37 · People 8 · Physical 14 · Tech 34</li>
+    <li><strong>5. SoA:</strong> centre of gravity of the audit</li>
+    <li><strong>6. IATM:</strong> Identify · Assess · Treat · Monitor</li>
+    <li><strong>7. 4 R's:</strong> Reduce · Retain · Refuse · Reassign</li>
+    <li><strong>8. Stage 1 = paper; Stage 2 = practice</strong></li>
+    <li><strong>9. 5 Os:</strong> Origin · Onboard · Operate · Oversee · Offboard</li>
+    <li><strong>10. Strong evidence = 3+ types covering define/configure/operate</strong></li>
+  </ul>
+</div>
+
+<div class="cheat">
+  <h3>What to say in any meeting</h3>
+  <ul>
+    <li><strong>If you don't know:</strong> "Let me come back to you with a precise answer by [time]."</li>
+    <li><strong>If pushed on cost:</strong> "I'll share the cost breakdown in the steering — happy to walk through after."</li>
+    <li><strong>If pushed on timeline:</strong> "12 months is realistic for integrated cert with this scope. Faster is possible but risky."</li>
+    <li><strong>If asked an inflammatory question:</strong> "Help me understand what you're really worried about."</li>
+    <li><strong>If finding pushback:</strong> "The auditor will examine this evidence too. I'd rather we agree the right framing now."</li>
+    <li><strong>If interrupted:</strong> Let them finish. Then: "To your point — [acknowledge] — and here's how it connects."</li>
+  </ul>
+</div>
+
+<div class="cheat">
+  <h3>Phrases that destroy credibility (never say these)</h3>
+  <ul>
+    <li>"Per the framework..." → frameworks don't decide; people do</li>
+    <li>"It's a best practice." → too vague; cite the requirement specifically</li>
+    <li>"It depends." (without then explaining) → looks evasive</li>
+    <li>"In our experience..." → without an actual example</li>
+    <li>"That's outside scope." → too defensive; reframe as "I'll flag it and we'll decide together"</li>
+    <li>"The previous firm..." → never. Just don't.</li>
+  </ul>
+</div>
+
+<!-- ============================================ -->
+<!-- GLOSSARY -->
+<!-- ============================================ -->
+<div class="part-banner">
+  <span class="num">REFERENCE</span>
+  <h2>Glossary — Speak Like You've Done This Before</h2>
+</div>
+
+<div class="card">
+
+  <div class="glossary-item">
+    <strong>ISMS</strong>
+    <p>Information Security Management System — the documented, operating system Network18 uses to manage information security. ISO 27001 is the standard <em>for</em> the ISMS.</p>
+  </div>
+
+  <div class="glossary-item">
+    <strong>SoA (Statement of Applicability)</strong>
+    <p>The document listing all 93 Annex A controls, marking each as Applicable / Not Applicable, with justification. The audit's centre of gravity.</p>
+  </div>
+
+  <div class="glossary-item">
+    <strong>CB (Certification Body)</strong>
+    <p>The independent organization that audits and grants certification (BSI, DNV, BV, TUV, etc.). Must itself be accredited (e.g., by UKAS, NABCB).</p>
+  </div>
+
+  <div class="glossary-item">
+    <strong>Stage 1 / Stage 2 audit</strong>
+    <p>Stage 1 = documentation review (paper-readiness). Stage 2 = implementation audit (practice-readiness). Both required for initial certification.</p>
+  </div>
+
+  <div class="glossary-item">
+    <strong>Surveillance audit</strong>
+    <p>Smaller annual CB audit in Years 2 and 3 of the certification cycle. Confirms continued operation.</p>
+  </div>
+
+  <div class="glossary-item">
+    <strong>Recertification audit</strong>
+    <p>Full re-audit at end of Year 3 to renew the certificate for another 3-year cycle.</p>
+  </div>
+
+  <div class="glossary-item">
+    <strong>NC (Non-Conformity)</strong>
+    <p>Audit finding indicating a clause/control isn't met. Major = systemic / blocks certification. Minor = isolated / doesn't block but must be addressed.</p>
+  </div>
+
+  <div class="glossary-item">
+    <strong>OFI (Opportunity for Improvement)</strong>
+    <p>Suggestion from the auditor — not mandatory. Tracking them shows continual improvement.</p>
+  </div>
+
+  <div class="glossary-item">
+    <strong>CAPA (Corrective &amp; Preventive Action)</strong>
+    <p>Process for closing audit findings and preventing recurrence. Required by Clause 10.</p>
+  </div>
+
+  <div class="glossary-item">
+    <strong>Annex A</strong>
+    <p>The 93-control catalog in ISO 27001:2022. Organized as A.5 (Org), A.6 (People), A.7 (Physical), A.8 (Tech).</p>
+  </div>
+
+  <div class="glossary-item">
+    <strong>Annex SL / High-Level Structure (HLS)</strong>
+    <p>The common 10-clause structure shared across all modern ISO management system standards. Makes integration possible.</p>
+  </div>
+
+  <div class="glossary-item">
+    <strong>Risk appetite vs tolerance vs capacity</strong>
+    <p>Capacity = max you can absorb. Appetite = what board approves. Tolerance = comfortable operating range inside appetite.</p>
+  </div>
+
+  <div class="glossary-item">
+    <strong>Inherent vs Residual risk</strong>
+    <p>Inherent = before controls. Residual = after controls. The difference is what your controls are buying.</p>
+  </div>
+
+  <div class="glossary-item">
+    <strong>TPRM</strong>
+    <p>Third-Party Risk Management — the lifecycle program covering vendors / suppliers / partners.</p>
+  </div>
+
+  <div class="glossary-item">
+    <strong>SOC 2 (Type I vs Type II)</strong>
+    <p>SOC 2 Type I = design of controls at a point in time. Type II = operating effectiveness over a period (typically 6-12 months). Type II is what you want.</p>
+  </div>
+
+  <div class="glossary-item">
+    <strong>Concentration risk</strong>
+    <p>When too many critical services depend on one vendor. A failure at that vendor cascades. AWS / GCP outages are common examples.</p>
+  </div>
+
+  <div class="glossary-item">
+    <strong>Shared responsibility model</strong>
+    <p>The cloud principle that vendor (AWS/GCP/Azure) is responsible for "security of the cloud" and customer is responsible for "security in the cloud." Many enterprises confuse this.</p>
+  </div>
+
+  <div class="glossary-item">
+    <strong>DPDPA 2023</strong>
+    <p>Digital Personal Data Protection Act, 2023 — India's personal data protection law. Drives consent, retention, deletion, breach notification, data principal rights.</p>
+  </div>
+
+  <div class="glossary-item">
+    <strong>CERT-In 6-hour rule</strong>
+    <p>India's CERT-In directive (April 2022) requires reporting of specified cyber incidents within 6 hours of becoming aware. Among the strictest globally.</p>
+  </div>
+
+  <div class="glossary-item">
+    <strong>SEBI material event</strong>
+    <p>Regulation 30 of SEBI LODR — listed companies must disclose "material events" within 30 minutes. A major cyber incident likely qualifies.</p>
+  </div>
+
+  <div class="glossary-item">
+    <strong>DPIA (Data Protection Impact Assessment)</strong>
+    <p>Structured assessment for processing activities likely to result in high risk to data principals. Required under DPDPA for certain processing.</p>
+  </div>
+
+  <div class="glossary-item">
+    <strong>BCM / BCP / DR</strong>
+    <p>BCM = Business Continuity Management (the overall discipline). BCP = the Plan. DR = Disaster Recovery (IT-specific subset).</p>
+  </div>
+
+  <div class="glossary-item">
+    <strong>RTO / RPO</strong>
+    <p>Recovery Time Objective (how fast to restore) / Recovery Point Objective (how much data we can afford to lose).</p>
+  </div>
+
+  <div class="glossary-item">
+    <strong>Management Review (Clause 9.3)</strong>
+    <p>Mandatory periodic top-management review of ISMS performance. Six required inputs. Minutes matter.</p>
+  </div>
+
+  <div class="glossary-item">
+    <strong>Internal Audit (Clause 9.2)</strong>
+    <p>Mandatory independent audit of the ISMS against the standard and own requirements. Must occur before certification.</p>
+  </div>
+
+</div>
+
+<div class="card">
+  <h3>Final reminder — what makes a great GRC Manager at Network18</h3>
+  <ol>
+    <li><strong>Know the standard cold.</strong> You can quote any clause or control on the fly.</li>
+    <li><strong>Be the calmest person in the room.</strong> Especially during audit week.</li>
+    <li><strong>Own the SoA.</strong> Carry it. Defend it. Update it.</li>
+    <li><strong>Connect the dots</strong> across W1 (SOC), W2 (VA/AppSec), and W3 (GRC). The integrated value is yours to demonstrate.</li>
+    <li><strong>Pre-wire findings.</strong> Never surprise an executive in a meeting.</li>
+    <li><strong>Build evidence muscle.</strong> Six types, three minimum per Tier-1 control.</li>
+    <li><strong>Make management reviews real.</strong> Not theatre. Real decisions, real follow-ups.</li>
+    <li><strong>Keep showing up.</strong> Year 1 wins certification. Years 2-3 win the renewal.</li>
+  </ol>
+
+  <div class="key">
+    <strong>You are the trusted advisor.</strong> Network18 doesn't just need an auditor — they need someone who'll walk alongside them for three years and make their certification mean something. That's the seat you're sitting in.
+  </div>
+</div>
+
+</div>
+
+<footer>
+  Network18 GRC Workstream — Deep Dive Playbook v1.0<br>
+  Built for the GRC Engagement Manager · All Network18 figures are indicative · Replace with actuals at mobilization
+</footer>
+
+</body>
+</html>
